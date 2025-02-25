@@ -1,0 +1,45 @@
+Shape of the train dataset: (1446, 2, 3, 1)
+Shape of the test dataset: (179, 2, 3, 1)
+Shape of the validation dataset: (161, 2, 3, 1)
+Best parameters found: {'filters': 55, 'kernel_size': (3, 3), 'learning_rate': 0.0007235636967859724, 'padding': 'same', 'strides': (1, 1)}
+Best cross-validated accuracy: 0.96
+F1 score of the best model: 0.97
+Test accuracy of the best model: 0.97
+
+
+Shape of the train dataset: (1446, 2, 3, 1)
+Shape of the test dataset: (179, 2, 3, 1)
+Shape of the validation dataset: (161, 2, 3, 1)
+Best parameters found: {'filters': 33, 'kernel_size': (3, 3), 'learning_rate': 0.0009360787635373775, 'padding': 'same', 'strides': (2, 2)}
+Best cross-validated accuracy: 0.96
+F1 score of the best model: 0.98
+Test accuracy of the best model: 0.98
+
+
+Shape of the train dataset: (641, 10, 11, 1)
+Shape of the test dataset: (81, 10, 11, 1)
+Shape of the validation dataset: (87, 10, 11, 1)
+Best parameters found: {'filters': 60, 'kernel_size': (3, 3), 'learning_rate': 0.0009442657485810174, 'padding': 'valid', 'strides': (2, 2)}
+Best cross-validated accuracy: 1.00
+F1 score of the best model: 0.00
+Test accuracy of the best model: 1.00
+
+
+Shape of the train dataset: (641, 10, 11, 1)
+Shape of the test dataset: (81, 10, 11, 1)
+Shape of the validation dataset: (87, 10, 11, 1)
+Best parameters found: {'filters': 60, 'kernel_size': (3, 3), 'learning_rate': 0.0009442657485810174, 'padding': 'valid', 'strides': (2, 2)}
+Best cross-validated accuracy: 1.00
+F1 score of the best model: 0.00
+Test accuracy of the best model: 1.00
+
+
+Shape of the train dataset: (1446, 2, 2, 1)
+Shape of the test dataset: (179, 2, 2, 1)
+Shape of the validation dataset: (161, 2, 2, 1)
+Best parameters found: {'filters': 17, 'kernel_size': (2, 3), 'learning_rate': 0.0009121687287754933, 'padding': 'same', 'strides': (1, 1)}
+Best cross-validated accuracy: 0.96
+F1 score of the best model: 0.99
+Test accuracy of the best model: 0.99
+
+
