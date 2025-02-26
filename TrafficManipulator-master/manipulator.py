@@ -185,12 +185,12 @@ class Manipulator:
             acc_ics_time += ics_time
             last_end_time = cur_end_time
 
-            ttime1 = time.clock()
+            ttime1 = time.perf_counter()
             nstat = self.global_FE.FE.nstat
             self.global_FE = Kitsune(STA_best_pktList, np.Inf, False)
             self.global_FE.FE.nstat = safelyCopyNstat(nstat, False)
             RunFE(self.global_FE)
-            ttime2 = time.clock()
+            ttime2 = time.perf_counter()
             FE_time += (ttime2 - ttime1)
 
             # ---- Update statistics ----------------------------------------------+

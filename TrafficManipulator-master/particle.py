@@ -63,7 +63,7 @@ class Particle:
             # print("##Debug##", "X.mal[i][1]", self.X.mal[i][1])
             mal_pos.append(i + cft_num)
 
-        t1 = time.clock()
+        t1 = time.perf_counter()
 
         self.local_FE = Kitsune(self.pktList, np.Inf, True)
         self.local_FE.FE.nstat = safelyCopyNstat(nstat, True)
@@ -76,7 +76,7 @@ class Particle:
 
         norm_feature = knormer.transform(self.feature)
 
-        t2 = time.clock()
+        t2 = time.perf_counter()
 
         FE_time = t2 - t1
 
