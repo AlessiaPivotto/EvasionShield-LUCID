@@ -77,11 +77,11 @@ class Manipulator:
             RunFE(self.global_FE)
 
     def change_manipulator_params(self,
-                                  grp_size=5,
-                                  max_time_extend=5.,
-                                  max_cft_pkt=5,
-                                  min_time_extend=0.,
-                                  max_crafted_pkt_prob=1.):
+                                grp_size=5,
+                                max_time_extend=5.,
+                                max_cft_pkt=5,
+                                min_time_extend=0.,
+                                max_crafted_pkt_prob=1.):
         self.grp_size = grp_size
         self.max_time_extend = max_time_extend
         self.max_cft_pkt = max_cft_pkt
@@ -154,8 +154,8 @@ class Manipulator:
             # print("@Manipulator: Create PSO")
             # ---- initialize PSO--------------------------------------------+
             pso = PSO(max_iter=self.pso_iter,
-                      particle_num=self.pso_num,
-                      grp_size=self.pso_size)
+                    particle_num=self.pso_num,
+                    grp_size=self.pso_size)
 
             # ---- load a new pkt group--------------------------------------+
             groupList = self.pktList[st:ed]
@@ -206,6 +206,24 @@ class Manipulator:
             STA_gbl_dis_list.append(STA_gbl_dis)
             STA_avg_dis_list.append(STA_avg_dis)
             STA_all_feature_list.append(STA_best_all_feature)
+
+# ---my function to save the crafted packets---------------------+
+
+            if st != 0 and (st % 1000 == 0 or ed == len(self.pktList)) or ed == limit:
+                print("@Manipulator:Time elapsed:", time.time() - timer)
+                with open(sta_file, "wb") as f:
+                    pkl.dump(STA_X_list, f)
+                    pkl.dump(STA_feature_list, f)
+                    pkl.dump(STA_pktList_list, f)
+                    pkl.dump(STA_gbl_dis_list, f)
+                    pkl.dump(STA_avg_dis_list, f)
+                    pkl.dump(STA_all_feature_list, f)
+                print("@Manipulator:statistics.pkl is updated...")  
+                # Save manipulated packets to a pcap file 
+                all_packets = [pkt for group in STA_pktList_list for pkt in group]
+                base_name, ext = os.path.splitext(mal_pcap)
+                wrpcap(os.path.join(base_name + "_manipulated.pcap"), all_packets)
+                print("@Manipulator:Manipulated packets are saved to " + base_name + "_manipulated.pcap")
 
             # ---plt and dump info-------------------------------------------+
             if st != 0 and (st % 1000 == 0
