@@ -45,11 +45,12 @@ feature_list = OrderedDict([
 )
 
 def load_dataset(path):
-    # breakpoint()
     filename = glob.glob(path)[0]
     dataset = h5py.File(filename, "r")
     set_x_orig = np.array(dataset["set_x"][:])  # features
     set_y_orig = np.array(dataset["set_y"][:])  # labels
+
+    print("set_x_orig shape:", set_x_orig.shape)  # Debugging
 
     X_train = np.reshape(set_x_orig, (set_x_orig.shape[0], set_x_orig.shape[1], set_x_orig.shape[2], 1))
     Y_train = set_y_orig#.reshape((1, set_y_orig.shape[0]))
@@ -123,6 +124,7 @@ def padding(X,max_flow_len):
     for sample in X:
         flow_nr = sample.shape[0]
         padded_sample = np.pad(sample, ((0, max_flow_len - flow_nr), (0, 0)), 'constant',
-                            constant_values=(0, 0))  # padding
+                              constant_values=(0, 0))  # padding
         padded_X.append(padded_sample)
     return padded_X
+

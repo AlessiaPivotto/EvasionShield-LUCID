@@ -1,6 +1,5 @@
-# Copyright (c) 2022 @ FBK - Fondazione Bruno Kessler
 # Author: Roberto Doriguzzi-Corin
-# Project: LUCID: A Practical, Lightweight Deep Learning Solution for DDoS Attack Detection
+# Project: Lecture on Intrusion Detection with Deep Learning
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,8 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 import sys
 import time
+import glob
+import copy
 import pyshark
 import socket
 import pickle
@@ -23,7 +25,11 @@ import random
 import hashlib
 import argparse
 import ipaddress
+from collections import OrderedDict
+import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import OneHotEncoder
 from multiprocessing import Process, Manager, Value, Queue
 from util_functions import *
 
@@ -31,6 +37,7 @@ from util_functions import *
 # split a pcap file into smaller chunks to leverage multi-core CPUs: tcpdump -r dataset.pcap -w dataset-chunk -C 1000
 # dataset parsing (first step): python3 lucid_dataset_parser.py --dataset_type SYN2020 --dataset_folder ./sample-dataset/ --packets_per_flow 10 --dataset_id SYN2020 --traffic_type all --time_window 10
 # dataset parsing (second step): python3 lucid_dataset_parser.py --preprocess_folder ./sample-dataset/
+
 
 IDS2018_DDOS_FLOWS = {'attackers': ['18.218.115.60', '18.219.9.1','18.219.32.43','18.218.55.126','52.14.136.135','18.219.5.43','18.216.200.189','18.218.229.235','18.218.11.51','18.216.24.42'],
                       'victims': ['18.218.83.150','172.31.69.28']}
@@ -41,13 +48,24 @@ IDS2017_DDOS_FLOWS = {'attackers': ['172.16.0.1'],
 CUSTOM_DDOS_SYN = {'attackers': ['11.0.0.' + str(x) for x in range(1,255)],
                       'victims': ['10.42.0.2']}
 
+CUSTOM_DDOS_SYN_CLASSES = ['benign','syn']
+
 DOS2019_FLOWS = {'attackers': ['172.16.0.5'], 'victims': ['192.168.50.1', '192.168.50.4']}
+
+#DOS2019_CLASSES = {'benign': 0, 'webddos': 1, 'ldap': 2, 'portmap': 3, 'dns': 4, 'udplag': 5, 'ntp': 6, 'snmp': 7, 'ssdp': 8, 'syn': 9, 'tftp': 10, 'udp': 11, 'netbios': 12, 'mssql': 13}
+#DOS2019_CLASSES = ['benign', 'dns', 'syn','udplag','webddos'] 
+DOS2019_CLASSES = ['benign', 'dns', 'ldap', 'mssql', 'netbios', 'ntp', 'portmap', 'snmp', 'ssdp', 'syn', 'tftp', 'udp', 'udplag', 'webddos'] #IMPORTANT: alphabetical order
 
 DDOS_ATTACK_SPECS = {
     'DOS2017' : IDS2017_DDOS_FLOWS,
     'DOS2018' : IDS2018_DDOS_FLOWS,
     'SYN2020' : CUSTOM_DDOS_SYN,
     'DOS2019': DOS2019_FLOWS
+}
+
+DDOS_ATTACK_CLASSES = {
+    'SYN2020' : CUSTOM_DDOS_SYN_CLASSES,
+    'DOS2019': DOS2019_CLASSES
 }
 
 
@@ -66,6 +84,40 @@ class packet_features:
 
     def __str__(self):
         return "{} -> {}".format(self.id_fwd, self.features_list)
+    
+def multiclass_labels(dataset_type):
+    one_hot_labels = {}
+
+    if dataset_type is not None and dataset_type in DDOS_ATTACK_CLASSES:
+        DDOS_CLASSES = DDOS_ATTACK_CLASSES[dataset_type]
+    else:
+        return None 
+
+    label_encoder = LabelEncoder()
+    integer_encoded = label_encoder.fit_transform(DDOS_CLASSES)
+
+
+    # Reshape the integer encoded labels to a 2D array
+    integer_encoded = integer_encoded.reshape(len(integer_encoded), 1)
+
+    # One-hot encode the integer encoded labels
+    onehot_encoder = OneHotEncoder(sparse_output=False)
+    onehot_encoded = onehot_encoder.fit_transform(integer_encoded)
+
+    # Print the original class labels
+    #print("Original class labels:", DDOS_CLASSES)
+
+    # Print the one-hot encoded representation
+    #print("One-hot encoded representation:")
+    for i in range(len(DDOS_CLASSES)):
+        one_hot_labels[DDOS_CLASSES[i]] = onehot_encoded[i]
+        #print(DDOS_CLASSES[i], "->", onehot_encoded[i])
+
+    return one_hot_labels
+
+def flag_to_int(value):
+    mapping = {'0':0, 'False': 0, '1': 1, 'True': 1}
+    return mapping.get(value, None)
 
 def get_ddos_flows(attackers,victims):
     DDOS_FLOWS = {}
@@ -114,9 +166,15 @@ def parse_packet(pkt):
     try:
         pf.features_list.append(float(pkt.sniff_timestamp))  # timestampchild.find('Tag').text
         pf.features_list.append(int(pkt.ip.len))  # packet length
-        pf.features_list.append(int(hashlib.sha256(str(pkt.highest_layer).encode('utf-8')).hexdigest(),
-                                    16) % 10 ** 8)  # highest layer in the packet
-        pf.features_list.append(int(int(pkt.ip.flags, 16)))  # IP flags
+        #pf.features_list.append(int(hashlib.sha256(str(pkt.highest_layer).encode('utf-8')).hexdigest(),
+        #                            16) % 10 ** 8)  # highest layer in the packet
+        #pf.features_list.append(int(int(pkt.ip.flags, 16)))  # IP flags
+        pf.features_list.append(flag_to_int(pkt.ip.flags_df)) # don't fragment
+        pf.features_list.append(flag_to_int(pkt.ip.flags_mf)) # more fragments
+        pf.features_list.append(flag_to_int(pkt.ip.flags_rb)) # reserved bit
+
+        pf.features_list.append(int(pkt.ip.frag_offset)) # 13-bit fragment offset
+
         tmp_id[0] = str(pkt.ip.src)  # int(ipaddress.IPv4Address(pkt.ip.src))
         tmp_id[2] = str(pkt.ip.dst)  # int(ipaddress.IPv4Address(pkt.ip.dst))
 
@@ -133,21 +191,30 @@ def parse_packet(pkt):
                 tmp_id[1] = int(pkt.tcp.srcport)
                 tmp_id[3] = int(pkt.tcp.dstport)
                 pf.features_list.append(int(pkt.tcp.len))  # TCP length
-                pf.features_list.append(int(pkt.tcp.ack))  # TCP ack
-                pf.features_list.append(int(pkt.tcp.flags, 16))  # TCP flags
+                #pf.features_list.append(int(pkt.tcp.ack))  # TCP ack
+                #pf.features_list.append(int(pkt.tcp.flags, 16))  # TCP flags
+                pf.features_list.append(flag_to_int(pkt.tcp.flags_ack)) # Acknowledgment
+                pf.features_list.append(flag_to_int(pkt.tcp.flags_cwr)) # Congestion Window Reduced
+                pf.features_list.append(flag_to_int(pkt.tcp.flags_ecn)) # 
+                pf.features_list.append(flag_to_int(pkt.tcp.flags_fin))
+                pf.features_list.append(flag_to_int(pkt.tcp.flags_push))
+                pf.features_list.append(flag_to_int(pkt.tcp.flags_res))
+                pf.features_list.append(flag_to_int(pkt.tcp.flags_reset))
+                pf.features_list.append(flag_to_int(pkt.tcp.flags_syn))
+                pf.features_list.append(flag_to_int(pkt.tcp.flags_urg))
                 pf.features_list.append(int(pkt.tcp.window_size_value))  # TCP window size
                 pf.features_list = pf.features_list + [0, 0]  # UDP + ICMP positions
             elif protocol == socket.IPPROTO_UDP:
-                pf.features_list = pf.features_list + [0, 0, 0, 0]  # TCP positions
+                pf.features_list = pf.features_list + [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]  # TCP positions
                 tmp_id[1] = int(pkt.udp.srcport)
                 pf.features_list.append(int(pkt.udp.length))  # UDP length
                 tmp_id[3] = int(pkt.udp.dstport)
                 pf.features_list = pf.features_list + [0]  # ICMP position
         elif protocol == socket.IPPROTO_ICMP:
-            pf.features_list = pf.features_list + [0, 0, 0, 0, 0]  # TCP and UDP positions
+            pf.features_list = pf.features_list + [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]  # TCP and UDP positions
             pf.features_list.append(int(pkt.icmp.type))  # ICMP type
         else:
-            pf.features_list = pf.features_list + [0, 0, 0, 0, 0, 0]  # padding for layer3-only packets
+            pf.features_list = pf.features_list + [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]  # padding for layer3-only packets (TCP+UDP+ICMP positions)
             tmp_id[4] = 0
 
         pf.id_fwd = (tmp_id[0], tmp_id[1], tmp_id[2], tmp_id[3], tmp_id[4])
@@ -160,13 +227,15 @@ def parse_packet(pkt):
         return None
 
 # Offline preprocessing of pcap files for model training, validation and testing
-def process_pcap(pcap_file,dataset_type,in_labels,max_flow_len,labelled_flows,max_flows=0, traffic_type='all',time_window=TIME_WINDOW):
+def process_pcap(pcap_file,dataset_type,bin_labels,mc_labels, max_flow_len,labelled_flows,max_flows=0, traffic_type='all',time_window=TIME_WINDOW):
     start_time = time.time()
     temp_dict = OrderedDict()
     start_time_window = -1
 
     pcap_name = pcap_file.split("/")[-1]
     print("Processing file: ", pcap_name)
+    traffic_label = pcap_name.split("-")[0]
+
 
     cap = pyshark.FileCapture(pcap_file)
     for i, pkt in enumerate(cap):
@@ -182,7 +251,7 @@ def process_pcap(pcap_file,dataset_type,in_labels,max_flow_len,labelled_flows,ma
         if max_flows > 0 and len(temp_dict) >= max_flows:
             break
 
-    apply_labels(temp_dict, labelled_flows, in_labels, traffic_type)
+    apply_labels(temp_dict, labelled_flows, bin_labels, mc_labels, traffic_label, traffic_type)
     print('Completed file {} in {} seconds.'.format(pcap_name, time.time() - start_time))
 
 # Transforms live traffic into input samples for inference
@@ -231,64 +300,82 @@ def store_packet(pf,temp_dict,start_time_window, max_flow_len):
                 temp_dict[pf.id_bwd][start_time_window] = np.array([pf.features_list])
     return temp_dict
 
-def apply_labels(flows, labelled_flows, labels, traffic_type):
+def apply_labels(flows, labelled_flows, bin_labels, mc_labels, traffic_label, traffic_type):
     for five_tuple, flow in flows.items():
-        if labels is not None:
+        if bin_labels is not None:
             short_key = (five_tuple[0], five_tuple[2])  # for IDS2017/IDS2018 dataset the labels have shorter keys
-            flow['label'] = labels.get(short_key, 0)
+            bin_label = bin_labels.get(short_key, 0) # attack/benign
+            if bin_label == 0:
+                flow['label'] = mc_labels['benign']
+                flow['label_string'] = 'benign'
+            else:
+                flow['label'] = mc_labels[traffic_label]
+                flow['label_string'] = traffic_label
 
         for flow_key, packet_list in flow.items():
             # relative time wrt the time of the first packet in the flow
-            if flow_key != 'label':
+            if flow_key != 'label' and flow_key != 'label_string':
                 amin = np.amin(packet_list,axis=0)[0]
                 packet_list[:, 0] = packet_list[:, 0] - amin
 
-        if traffic_type == 'ddos' and flow['label'] == 0: # we only want malicious flows from this dataset
-            continue
-        elif traffic_type == 'benign' and flow['label'] > 0: # we only want benign flows from this dataset
-            continue
-        else:
-            labelled_flows.append((five_tuple,flow))
+        labelled_flows.append((five_tuple,flow))
 
 # returns the total number of flows
-def count_flows(preprocessed_flows):
-    ddos_flows = 0
+def count_flows(preprocessed_flows, mc_labels):
+    flow_counters = {key: 0 for key in list(mc_labels.keys())}
+    fragment_counters = {key: 0 for key in list(mc_labels.keys())}
     total_flows = len(preprocessed_flows)
-    ddos_fragments = 0
     total_fragments = 0
     for flow in preprocessed_flows:
-        flow_fragments = len(flow[1]) - 1
+        flow_fragments = len(flow[1]) - 2 # the label and the label string do not count
         total_fragments += flow_fragments
-        if flow[1]['label'] > 0:
-            ddos_flows += 1
-            ddos_fragments += flow_fragments  # the label does not count
+        flow_label = flow[1]['label_string']
+        flow_counters[flow_label] +=1
+        fragment_counters[flow_label] += flow_fragments  
 
-    return (total_flows, ddos_flows, total_flows - ddos_flows), (total_fragments, ddos_fragments, total_fragments-ddos_fragments)
+    return total_flows, total_fragments, flow_counters, fragment_counters
 
 # balance the dataset based on the number of benign and malicious fragments of flows
-def balance_dataset(flows,total_fragments=float('inf')):
+def balance_dataset(flows,mc_labels,samples_per_class=float('inf')):
     new_flow_list = []
+    new_fragment_counters = {key: 0 for key in list(mc_labels.keys())}
 
-    _,(_, ddos_fragments, benign_fragments) = count_flows(flows)
+    _,_,_,fragment_counters = count_flows(flows,mc_labels)
 
-    if ddos_fragments == 0 or benign_fragments == 0:
-        min_fragments = total_fragments
-    else:
-        min_fragments = min(total_fragments/2,ddos_fragments,benign_fragments)
+    list_of_fragment_counters = np.array(list(fragment_counters.values()))
+
+    fragment_nonzero_values = list_of_fragment_counters[np.nonzero(list_of_fragment_counters)]
+
+    min_fragments = np.min(fragment_nonzero_values) #min(fragment_counters.values())
+    samples_per_class = min(min_fragments,samples_per_class)
 
     random.shuffle(flows)
-    new_benign_fragments = 0
-    new_ddos_fragments = 0
-
     for flow in flows:
-        if flow[1]['label'] == 0 and (new_benign_fragments < min_fragments ):
-            new_benign_fragments += len(flow[1]) - 1
-            new_flow_list.append(flow)
-        elif flow[1]['label'] > 0 and (new_ddos_fragments < min_fragments):
-            new_ddos_fragments += len(flow[1]) - 1
+        if new_fragment_counters[flow[1]['label_string']] < samples_per_class:
+            new_fragment_counters[flow[1]['label_string']] += len(flow[1]) - 2
             new_flow_list.append(flow)
 
-    return new_flow_list, new_benign_fragments, new_ddos_fragments
+    return new_flow_list, new_fragment_counters
+
+def mc_to_bin_labels(flows):
+    labels = {'benign': 0, 'attack': 1}
+    for flow in flows:
+        if flow[1]['label_string'] == 'benign':
+            flow[1]['label'] = labels['benign']
+        else:
+            flow[1]['label_string'] = 'attack'
+            flow[1]['label'] = labels['attack']
+    return flows, labels
+
+def mc_to_int_labels(flows):
+    labels = {}
+    for flow in flows:
+        flow[1]['label'] = DOS2019_CLASSES.index(flow[1]['label_string'])
+
+        retVal = labels.get(flow[1]['label_string'])
+        if retVal is None:
+            labels[flow[1]['label_string']] = DOS2019_CLASSES.index(flow[1]['label_string'])
+    return flows, labels
 
 # convert the dataset from dictionaries with 5-tuples keys into a list of flow fragments and another list of labels
 def dataset_to_list_of_fragments(dataset):
@@ -301,17 +388,17 @@ def dataset_to_list_of_fragments(dataset):
         flow_data = flow[1]
         label = flow_data['label']
         for key, fragment in flow_data.items():
-            if key != 'label':
+            if key != 'label' and key != 'label_string':
                 X.append(fragment)
                 y.append(label)
                 keys.append(tuple)
 
     return X,y,keys
 
-def train_test_split(flow_list,train_size=TRAIN_SIZE, shuffle=True):
+def train_test_split(flow_list,mc_labels, train_size=TRAIN_SIZE, shuffle=True):
     test_list = []
-    _,(total_examples,_,_) = count_flows(flow_list)
-    test_examples = total_examples - total_examples*train_size
+    _,total_fragments,_,_ = count_flows(flow_list,mc_labels)
+    test_examples = total_fragments - total_fragments*train_size
 
     if shuffle == True:
         random.shuffle(flow_list)
@@ -320,7 +407,7 @@ def train_test_split(flow_list,train_size=TRAIN_SIZE, shuffle=True):
     while current_test_examples < test_examples:
         flow = flow_list.pop(0)
         test_list.append(flow)
-        current_test_examples += len(flow[1])-1
+        current_test_examples += len(flow[1])-2
 
 
     return flow_list,test_list
@@ -340,7 +427,7 @@ def main(argv):
                         help='Folder with the dataset')
     parser.add_argument('-o', '--output_folder', nargs='+', type=str,
                         help='Output folder')
-    parser.add_argument('-f', '--traffic_type', default='all', nargs='+', type=str,
+    parser.add_argument('-f', '--traffic_type', default='all', nargs='?', type=str,
                         help='Type of flow to process (all, benign, ddos)')
     parser.add_argument('-p', '--preprocess_folder', nargs='+', type=str,
                         help='Folder with preprocessed data')
@@ -348,46 +435,33 @@ def main(argv):
                         help='File with preprocessed data')
     parser.add_argument('-b', '--balance_folder', nargs='+', type=str,
                         help='Folder where balancing datasets')
-    parser.add_argument('-n', '--packets_per_flow', nargs='+', type=str,
+    parser.add_argument('-n', '--packets_per_flow', nargs='?', type=int, default=MAX_FLOW_LEN,
                         help='Packet per flow sample')
     parser.add_argument('-s', '--samples', default=float('inf'), type=int,
                         help='Number of training samples in the reduced output')
-    parser.add_argument('-i', '--dataset_id', nargs='+', type=str,
+    parser.add_argument('-i', '--dataset_id', nargs='?', type=str, default='',
                         help='String to append to the names of output files')
     parser.add_argument('-m', '--max_flows', default=0, type=int,
                         help='Max number of flows to extract from the pcap files')
     parser.add_argument('-l', '--label', default=1, type=int,
                         help='Label assigned to the DDoS class')
 
-    parser.add_argument('-t', '--dataset_type', nargs='+', type=str,
+    parser.add_argument('-t', '--dataset_type', nargs='?', type=str,
                         help='Type of the dataset. Available options are: DOS2017, DOS2018, DOS2019, SYN2020')
 
-    parser.add_argument('-w', '--time_window', nargs='+', type=str,
+    parser.add_argument('-w', '--time_window', nargs='?', type=float, default=TIME_WINDOW,
                         help='Length of the time window')
 
-    parser.add_argument('--no_split', help='Do not split the dataset', action='store_true')
+    parser.add_argument('--dont_normalize', help='Normalize the dataset', action='store_true')
+    parser.add_argument('--flatten', help='Flatten the input arrays', action='store_true')
+    parser.add_argument('-mc', '--multiclass', default=0, type=int,
+                        help='0=binary, 1=one-hot encoding multiclass, 2=integer multiclass')
 
     args = parser.parse_args()
-
-    if args.packets_per_flow is not None:
-        max_flow_len = int(args.packets_per_flow[0])
-    else:
-        max_flow_len = MAX_FLOW_LEN
-
-    if args.time_window is not None:
-        time_window = float(args.time_window[0])
-    else:
-        time_window = TIME_WINDOW
-
-    if args.dataset_id is not None:
-        dataset_id = str(args.dataset_id[0])
-    else:
-        dataset_id = ''
-
-    if args.traffic_type is not None:
-        traffic_type = str(args.traffic_type[0])
-    else:
-        traffic_type = 'all'
+    time_window = args.time_window
+    max_flow_len = args.packets_per_flow
+    traffic_type = args.traffic_type
+    dataset_type = args.dataset_type
 
     if args.dataset_folder is not None and args.dataset_type is not None:
         process_list = []
@@ -398,14 +472,15 @@ def main(argv):
         else:
             output_folder = args.dataset_folder[0]
 
+        in_labels = parse_labels(dataset_type,args.dataset_folder[0],label=args.label)
+        mc_labels = multiclass_labels(dataset_type)
         filelist = glob.glob(args.dataset_folder[0]+ '/*.pcap')
-        in_labels = parse_labels(args.dataset_type[0],args.dataset_folder[0],label=args.label)
 
         start_time = time.time()
         for file in filelist:
             try:
                 flows = manager.list()
-                p = Process(target=process_pcap,args=(file,args.dataset_type[0],in_labels,max_flow_len,flows,args.max_flows, traffic_type,time_window))
+                p = Process(target=process_pcap,args=(file,dataset_type,in_labels,mc_labels, max_flow_len,flows,args.max_flows, traffic_type,time_window))
                 process_list.append(p)
                 flows_list.append(flows)
             except FileNotFoundError as e:
@@ -430,8 +505,10 @@ def main(argv):
 
         process_time = time.time()-start_time
 
-        if dataset_id == '':
-            dataset_id = str(args.dataset_type[0])
+        if args.dataset_id == '':
+            dataset_id = str(args.dataset_type)
+        else:
+            dataset_id = str(args.dataset_id) 
 
         filename = str(int(time_window)) + 't-' + str(max_flow_len) + 'n-' + dataset_id + '-preprocess'
         output_file = output_folder + '/' + filename
@@ -441,13 +518,19 @@ def main(argv):
             # store the data as binary data stream
             pickle.dump(preprocessed_flows, filehandle)
 
+        total_flows, total_samples, flow_counters, fragment_counters = count_flows(preprocessed_flows,mc_labels)
 
-        (total_flows, ddos_flows, benign_flows),  (total_fragments, ddos_fragments, benign_fragments) = count_flows(preprocessed_flows)
+        flow_string = ''
+        for label, counter in flow_counters.items():
+            flow_string += "("+ label + "," + str(counter) + ") "
 
-        log_string = time.strftime("%Y-%m-%d %H:%M:%S") + " | dataset_type:" + args.dataset_type[0] + \
-                     " | flows (tot,ben,ddos):(" + str(total_flows) + "," + str(benign_flows) + "," + str(ddos_flows) + \
-                     ") | fragments (tot,ben,ddos):(" + str(total_fragments) + "," + str(benign_fragments) + "," + str(ddos_fragments) + \
-                     ") | options:" + command_options + " | process_time:" + str(process_time) + " |\n"
+        sample_string = ''
+        for label, counter in fragment_counters.items():
+            sample_string += "("+ label + "," + str(counter) + ") " 
+
+        log_string = time.strftime("%Y-%m-%d %H:%M:%S") + " | dataset_type:" + args.dataset_type + \
+                        " | Tot (flows,samples): (" + str(total_flows) + "," + str(total_samples) + ") | Flows: " + flow_string + "| Samples: " + sample_string + \
+                        ") | options:" + command_options + " | process_time:" + str(process_time) + " |\n"
         print (log_string)
 
         # saving log file
@@ -497,76 +580,80 @@ def main(argv):
 
 
         # balance samples and redux the number of samples when requested
-        preprocessed_flows, benign_fragments, ddos_fragments = balance_dataset(preprocessed_flows,args.samples)
+        # transform a multiclass problem into a binary problem
+        if args.multiclass == 0:
+            preprocessed_flows, labels = mc_to_bin_labels(preprocessed_flows)
+        elif args.multiclass == 1:
+            labels = multiclass_labels(dataset_id)
+        elif args.multiclass == 2:
+            preprocessed_flows, labels = mc_to_int_labels(preprocessed_flows)
 
-        if len(preprocessed_flows) == 0:
+        preprocessed_flows, fragment_counters = balance_dataset(preprocessed_flows,labels,args.samples)
+        total_flows,total_samples,_,_ = count_flows(preprocessed_flows, labels)
+        
+
+        if total_flows == 0:
             print("Empty dataset!")
             exit()
 
-        preprocessed_train, preprocessed_test = train_test_split(preprocessed_flows,train_size=TRAIN_SIZE, shuffle=True)
-        preprocessed_train, preprocessed_val = train_test_split(preprocessed_train, train_size=TRAIN_SIZE, shuffle=True)
+        preprocessed_train, preprocessed_test = train_test_split(preprocessed_flows,labels, train_size=TRAIN_SIZE, shuffle=True)
+        preprocessed_train, preprocessed_val = train_test_split(preprocessed_train, labels, train_size=TRAIN_SIZE, shuffle=True)
 
         X_train, y_train, _ = dataset_to_list_of_fragments(preprocessed_train)
         X_val, y_val, _ = dataset_to_list_of_fragments(preprocessed_val)
         X_test, y_test, _ = dataset_to_list_of_fragments(preprocessed_test)
 
-        # normalization and padding
-        X_full = X_train + X_val + X_test
-        y_full = y_train + y_val + y_test
-        mins,maxs = static_min_max(time_window=time_window)
+        # obtain 1D samples
+        if args.flatten == True:
+            X_train = flatten_samples(X_train)
+            X_val = flatten_samples(X_val)
+            X_test = flatten_samples(X_test)
 
-        total_examples = len(y_full)
-        total_ddos_examples = np.count_nonzero(y_full)
-        total_benign_examples = total_examples - total_ddos_examples
+        mins,maxs = static_min_max(args.flatten,time_window=time_window,max_flow_len=max_flow_len) # static mins and maxs
+        #mins,maxs = find_min_max(X_full) # mins and maxs computed from the dataset
 
         output_file = output_folder + '/' + str(time_window) + 't-' + str(max_flow_len) + 'n-' + dataset_id + '-dataset'
-        if args.no_split == True: # don't split the dataset
-            norm_X_full = normalize_and_padding(X_full, mins, maxs, max_flow_len)
-            #norm_X_full = padding(X_full,max_flow_len) # only padding
-            norm_X_full_np = np.array(norm_X_full)
-            y_full_np = np.array(y_full)
-
-            hf = h5py.File(output_file + '-full.hdf5', 'w')
-            hf.create_dataset('set_x', data=norm_X_full_np)
-            hf.create_dataset('set_y', data=y_full_np)
-            hf.close()
-
-            [full_packets] = count_packets_in_dataset([norm_X_full_np])
-            log_string = time.strftime("%Y-%m-%d %H:%M:%S") + " | Total examples (tot,ben,ddos):(" + str(total_examples) + "," + str(total_benign_examples) + "," + str(total_ddos_examples) + \
-                         ") | Total packets:(" + str(full_packets) + \
-                         ") | options:" + command_options + " |\n"
+        
+        if args.flatten == True:
+            norm_X_train = normalize(X_train,mins,maxs) if args.dont_normalize == False else X_train
+            norm_X_val = normalize(X_val, mins, maxs) if args.dont_normalize == False else X_val
+            norm_X_test = normalize(X_test, mins, maxs) if args.dont_normalize == False else X_test
         else:
-            norm_X_train = normalize_and_padding(X_train,mins,maxs,max_flow_len)
-            norm_X_val = normalize_and_padding(X_val, mins, maxs, max_flow_len)
-            norm_X_test = normalize_and_padding(X_test, mins, maxs, max_flow_len)
+            norm_X_train = normalize_and_padding(X_train,mins,maxs,max_flow_len) if args.dont_normalize == False else padding(X_train,max_flow_len)
+            norm_X_val = normalize_and_padding(X_val, mins, maxs,max_flow_len) if args.dont_normalize == False else padding(X_val,max_flow_len)
+            norm_X_test = normalize_and_padding(X_test, mins, maxs,max_flow_len) if args.dont_normalize == False else padding(X_test,max_flow_len)
 
-            norm_X_train_np = np.array(norm_X_train)
-            y_train_np = np.array(y_train)
-            norm_X_val_np = np.array(norm_X_val)
-            y_val_np = np.array(y_val)
-            norm_X_test_np = np.array(norm_X_test)
-            y_test_np = np.array(y_test)
+        norm_X_train_np = np.array(norm_X_train)
+        y_train_np = np.array(y_train)
+        norm_X_val_np = np.array(norm_X_val)
+        y_val_np = np.array(y_val)
+        norm_X_test_np = np.array(norm_X_test)
+        y_test_np = np.array(y_test)
 
-            hf = h5py.File(output_file + '-train.hdf5', 'w')
-            hf.create_dataset('set_x', data=norm_X_train_np)
-            hf.create_dataset('set_y', data=y_train_np)
-            hf.close()
+        hf = h5py.File(output_file + '-train.hdf5', 'w')
+        hf.create_dataset('set_x', data=norm_X_train_np)
+        hf.create_dataset('set_y', data=y_train_np)
+        hf.close()
 
-            hf = h5py.File(output_file + '-val.hdf5', 'w')
-            hf.create_dataset('set_x', data=norm_X_val_np)
-            hf.create_dataset('set_y', data=y_val_np)
-            hf.close()
+        hf = h5py.File(output_file + '-val.hdf5', 'w')
+        hf.create_dataset('set_x', data=norm_X_val_np)
+        hf.create_dataset('set_y', data=y_val_np)
+        hf.close()
 
-            hf = h5py.File(output_file + '-test.hdf5', 'w')
-            hf.create_dataset('set_x', data=norm_X_test_np)
-            hf.create_dataset('set_y', data=y_test_np)
-            hf.close()
+        hf = h5py.File(output_file + '-test.hdf5', 'w')
+        hf.create_dataset('set_x', data=norm_X_test_np)
+        hf.create_dataset('set_y', data=y_test_np)
+        hf.close()
 
-            [train_packets, val_packets, test_packets] = count_packets_in_dataset([norm_X_train_np, norm_X_val_np, norm_X_test_np])
-            log_string = time.strftime("%Y-%m-%d %H:%M:%S") + " | examples (tot,ben,ddos):(" + str(total_examples) + "," + str(total_benign_examples) + "," + str(total_ddos_examples) + \
-                         ") | Train/Val/Test sizes: (" + str(norm_X_train_np.shape[0]) + "," + str(norm_X_val_np.shape[0]) + "," + str(norm_X_test_np.shape[0]) + \
-                         ") | Packets (train,val,test):(" + str(train_packets) + "," + str(val_packets) + "," + str(test_packets) + \
-                         ") | options:" + command_options + " |\n"
+        fragment_string = ''
+        for label, counter in fragment_counters.items():
+            fragment_string += "("+ label + "," + str(counter) + ") " 
+
+        [train_packets, val_packets, test_packets] = count_packets_in_dataset([norm_X_train_np, norm_X_val_np, norm_X_test_np],args.flatten)
+        log_string = time.strftime("%Y-%m-%d %H:%M:%S") + " | Tot (flows,samples): (" + str(total_flows) + "," + str(total_samples) + ") | Samples: " + fragment_string + \
+                        " | Train/Val/Test sizes: (" + str(norm_X_train_np.shape[0]) + "," + str(norm_X_val_np.shape[0]) + "," + str(norm_X_test_np.shape[0]) + \
+                        ") | Packets (train,val,test):(" + str(train_packets) + "," + str(val_packets) + "," + str(test_packets) + \
+                        ") | options:" + command_options + " |\n"
 
         print(log_string)
 
@@ -674,7 +761,7 @@ def main(argv):
         total_flows = final_y['train'].shape[0]+final_y['val'].shape[0]+final_y['test'].shape[0]
         ddos_flows = np.count_nonzero(final_y['train'])+np.count_nonzero(final_y['val'])+np.count_nonzero(final_y['test'])
         benign_flows = total_flows-ddos_flows
-        [train_packets, val_packets, test_packets] = count_packets_in_dataset([final_X['train'], final_X['val'], final_X['test']])
+        [train_packets, val_packets, test_packets] = count_packets_in_dataset([final_X['train'], final_X['val'], final_X['test']],args.flatten)
         log_string = time.strftime("%Y-%m-%d %H:%M:%S") + " | total_flows (tot,ben,ddos):(" + str(total_flows) + "," + str(benign_flows) + "," + str(ddos_flows) + \
                      ") | Packets (train,val,test):(" + str(train_packets) + "," + str(val_packets) + "," + str(test_packets) + \
                      ") | Train/Val/Test sizes: (" + str(final_y['train'].shape[0]) + "," + str(final_y['val'].shape[0]) + "," + str(final_y['test'].shape[0]) + \
@@ -698,14 +785,3 @@ def main(argv):
 
 if __name__ == "__main__":
     main(sys.argv)
-
-
-
-
-# python3 lucid_dataset_parser.py --dataset_type DOS2019 --dataset_folder ./FLAD-PCAPS/01-LDAP/ --packets_per_flow 100 --dataset_id DOS2019 --traffic_type all --time_window 10
-
-
-# ps: ricordati che in FLAD-PCAPS (baseline dataset) hai sia il formato matriciale che quello vettoriale. 10 è flatten (e l'ho stritto anche nel nome degli hdf5) mentre 100 ppf è per la versione matriciale.
-# ragionandoci nei manipolati non ha senso fare la divisione in train/val/test dato che devo solo testare. (mi sa che i file sono troppo grandi quindi unisco tutti i test per avere il quadro generale, poi per testare attacco singolo faccio il merge di train test e val dell'attacco)
-# per ora ho fatto solo il merge di tutti i test, poi dovrei fare il merge dei vari attacchi singoli, o rifaccio il parsing e via.
-# ora alleno lucid con baseline dataset train 10t-100n matriciale.
