@@ -177,3 +177,6 @@ cython_debug/
 *.npy
 *.pkl
 *.csv
+*.h5
+DATASETS/
+tesi/
