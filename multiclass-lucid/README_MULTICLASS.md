@@ -161,15 +161,3 @@ The multiclass model now provides:
 - Inference time remains similar
 - More detailed evaluation metrics available
 
-## Troubleshooting
-
-1. **Import Errors**: Ensure all dependencies are installed:
-   ```bash
-   pip install tensorflow scikit-learn h5py numpy
-   ```
-
-2. **Label Conversion Issues**: Check that folder/file names contain recognizable attack type patterns
-
-3. **Memory Issues**: Reduce batch size in training/prediction if encountering OOM errors
-
-4. **Model Loading**: Ensure models are trained with the same NUM_CLASSES (14) configuration

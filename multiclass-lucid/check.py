@@ -3,6 +3,8 @@ import glob
 import numpy as np
 import os
 
+# 
+
 def inspect_hdf5_file(file_path):
     """Inspect the structure of an HDF5 file"""
     print(f"\n{'='*60}")
@@ -45,3 +47,4 @@ if __name__ == "__main__":
         inspect_folder(sys.argv[1])
     else:
         inspect_folder("./DATASETS")
+
