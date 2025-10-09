@@ -10,6 +10,8 @@ import random
 import numpy as np
 from utils import Unit
 
+random.seed(2025)
+
 
 def decide_has_pkt(crafted_pkt_prob):
     r = random.random()
