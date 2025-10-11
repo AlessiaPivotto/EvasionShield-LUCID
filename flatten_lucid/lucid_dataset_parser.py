@@ -510,7 +510,9 @@ def main(argv):
         else:
             dataset_id = str(args.dataset_id) 
 
-        filename = str(int(time_window)) + 't-' + str(max_flow_len) + 'n-' + dataset_id + '-preprocess'
+        # Add flatten specification to filename when flatten option is used
+        flatten_suffix = '-flatten' if args.flatten == True else ''
+        filename = str(int(time_window)) + 't-' + str(max_flow_len) + 'n-' + dataset_id + flatten_suffix + '-preprocess'
         output_file = output_folder + '/' + filename
         output_file = output_file.replace("//", "/") # remove double slashes when needed
 
@@ -612,7 +614,9 @@ def main(argv):
         mins,maxs = static_min_max(args.flatten,time_window=time_window,max_flow_len=max_flow_len) # static mins and maxs
         #mins,maxs = find_min_max(X_full) # mins and maxs computed from the dataset
 
-        output_file = output_folder + '/' + str(time_window) + 't-' + str(max_flow_len) + 'n-' + dataset_id + '-dataset'
+        # Add flatten specification to filename when flatten option is used
+        flatten_suffix = '-flatten' if args.flatten == True else ''
+        output_file = output_folder + '/' + str(time_window) + 't-' + str(max_flow_len) + 'n-' + dataset_id + flatten_suffix + '-dataset'
         
         if args.flatten == True:
             norm_X_train = normalize(X_train,mins,maxs) if args.dont_normalize == False else X_train

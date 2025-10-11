@@ -105,7 +105,7 @@ def DenseModel(model_name, input_shape, hidden_units=128, learning_rate=0.01, re
 
 def compileModel(model, lr):
     # optimizer = SGD(learning_rate=lr, momentum=0.0, decay=0.0, nesterov=False)
-    optimizer = Adam(learning_rate=lr, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
+    optimizer = Adam(learning_rate=lr, beta_1=0.9, beta_2=0.999, epsilon=1e-07, amsgrad=False)
     model.compile(loss='binary_crossentropy', optimizer=optimizer, metrics=['accuracy'])  # here we specify the loss function
 
 def main(argv):
