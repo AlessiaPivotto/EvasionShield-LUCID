@@ -116,8 +116,15 @@ def multiclass_labels(dataset_type):
     return one_hot_labels
 
 def flag_to_int(value):
-    mapping = {'0':0, 'False': 0, '1': 1, 'True': 1}
-    return mapping.get(value, None)
+    # Accept strings, ints, and booleans; default to 0 when unknown
+    mapping = {
+        '0': 0, '1': 1,
+        'False': 0, 'True': 1,
+        0: 0, 1: 1,
+        False: 0, True: 1,
+        None: 0
+    }
+    return mapping.get(value, 0)
 
 def get_ddos_flows(attackers,victims):
     DDOS_FLOWS = {}
@@ -164,55 +171,56 @@ def parse_packet(pkt):
     tmp_id = [0,0,0,0,0]
 
     try:
-        pf.features_list.append(float(pkt.sniff_timestamp))  # timestampchild.find('Tag').text
-        pf.features_list.append(int(pkt.ip.len))  # packet length
+        pf.features_list.append(float(pkt.sniff_timestamp))  # timestamp
+        pf.features_list.append(int(getattr(pkt.ip, 'len', 0)))  # packet length
         #pf.features_list.append(int(hashlib.sha256(str(pkt.highest_layer).encode('utf-8')).hexdigest(),
         #                            16) % 10 ** 8)  # highest layer in the packet
         #pf.features_list.append(int(int(pkt.ip.flags, 16)))  # IP flags
-        pf.features_list.append(flag_to_int(pkt.ip.flags_df)) # don't fragment
-        pf.features_list.append(flag_to_int(pkt.ip.flags_mf)) # more fragments
-        pf.features_list.append(flag_to_int(pkt.ip.flags_rb)) # reserved bit
+        pf.features_list.append(flag_to_int(getattr(pkt.ip, 'flags_df', 0))) # don't fragment
+        pf.features_list.append(flag_to_int(getattr(pkt.ip, 'flags_mf', 0))) # more fragments
+        pf.features_list.append(flag_to_int(getattr(pkt.ip, 'flags_rb', 0))) # reserved bit
 
-        pf.features_list.append(int(pkt.ip.frag_offset)) # 13-bit fragment offset
+        pf.features_list.append(int(getattr(pkt.ip, 'frag_offset', 0))) # 13-bit fragment offset
 
-        tmp_id[0] = str(pkt.ip.src)  # int(ipaddress.IPv4Address(pkt.ip.src))
-        tmp_id[2] = str(pkt.ip.dst)  # int(ipaddress.IPv4Address(pkt.ip.dst))
+        tmp_id[0] = str(getattr(pkt.ip, 'src', '0.0.0.0'))
+        tmp_id[2] = str(getattr(pkt.ip, 'dst', '0.0.0.0'))
 
-        protocols = vector_proto.transform([pkt.frame_info.protocols]).toarray().tolist()[0]
-        protocols = [1 if i >= 1 else 0 for i in
-                     protocols]  # we do not want the protocols counted more than once (sometimes they are listed twice in pkt.frame_info.protocols)
+        protocols = vector_proto.transform([getattr(pkt.frame_info, 'protocols', '')]).toarray().tolist()[0]
+        protocols = [1 if i >= 1 else 0 for i in protocols]
         protocols_value = int(np.dot(np.array(protocols), powers_of_two))
         pf.features_list.append(protocols_value)
 
-        protocol = int(pkt.ip.proto)
+        protocol = int(getattr(pkt.ip, 'proto', 0))
         tmp_id[4] = protocol
-        if pkt.transport_layer != None:
+        if getattr(pkt, 'transport_layer', None) is not None:
             if protocol == socket.IPPROTO_TCP:
-                tmp_id[1] = int(pkt.tcp.srcport)
-                tmp_id[3] = int(pkt.tcp.dstport)
-                pf.features_list.append(int(pkt.tcp.len))  # TCP length
+                tmp_id[1] = int(getattr(pkt.tcp, 'srcport', 0))
+                tmp_id[3] = int(getattr(pkt.tcp, 'dstport', 0))
+                pf.features_list.append(int(getattr(pkt.tcp, 'len', 0)))  # TCP length
                 #pf.features_list.append(int(pkt.tcp.ack))  # TCP ack
                 #pf.features_list.append(int(pkt.tcp.flags, 16))  # TCP flags
-                pf.features_list.append(flag_to_int(pkt.tcp.flags_ack)) # Acknowledgment
-                pf.features_list.append(flag_to_int(pkt.tcp.flags_cwr)) # Congestion Window Reduced
-                pf.features_list.append(flag_to_int(pkt.tcp.flags_ecn)) # 
-                pf.features_list.append(flag_to_int(pkt.tcp.flags_fin))
-                pf.features_list.append(flag_to_int(pkt.tcp.flags_push))
-                pf.features_list.append(flag_to_int(pkt.tcp.flags_res))
-                pf.features_list.append(flag_to_int(pkt.tcp.flags_reset))
-                pf.features_list.append(flag_to_int(pkt.tcp.flags_syn))
-                pf.features_list.append(flag_to_int(pkt.tcp.flags_urg))
-                pf.features_list.append(int(pkt.tcp.window_size_value))  # TCP window size
+                pf.features_list.append(flag_to_int(getattr(pkt.tcp, 'flags_ack', 0))) # Acknowledgment
+                pf.features_list.append(flag_to_int(getattr(pkt.tcp, 'flags_cwr', 0))) # Congestion Window Reduced
+                # ECE/ECN bit: PyShark exposes either flags_ece or flags_ecn depending on version; try both
+                pf.features_list.append(flag_to_int(getattr(pkt.tcp, 'flags_ece', getattr(pkt.tcp, 'flags_ecn', 0))))
+                pf.features_list.append(flag_to_int(getattr(pkt.tcp, 'flags_fin', 0)))
+                pf.features_list.append(flag_to_int(getattr(pkt.tcp, 'flags_push', 0)))
+                # Reserved bit may be missing in some versions
+                pf.features_list.append(flag_to_int(getattr(pkt.tcp, 'flags_res', 0)))
+                pf.features_list.append(flag_to_int(getattr(pkt.tcp, 'flags_reset', 0)))
+                pf.features_list.append(flag_to_int(getattr(pkt.tcp, 'flags_syn', 0)))
+                pf.features_list.append(flag_to_int(getattr(pkt.tcp, 'flags_urg', 0)))
+                pf.features_list.append(int(getattr(pkt.tcp, 'window_size_value', 0)))  # TCP window size
                 pf.features_list = pf.features_list + [0, 0]  # UDP + ICMP positions
             elif protocol == socket.IPPROTO_UDP:
                 pf.features_list = pf.features_list + [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]  # TCP positions
-                tmp_id[1] = int(pkt.udp.srcport)
-                pf.features_list.append(int(pkt.udp.length))  # UDP length
-                tmp_id[3] = int(pkt.udp.dstport)
+                tmp_id[1] = int(getattr(pkt.udp, 'srcport', 0))
+                pf.features_list.append(int(getattr(pkt.udp, 'length', 0)))  # UDP length
+                tmp_id[3] = int(getattr(pkt.udp, 'dstport', 0))
                 pf.features_list = pf.features_list + [0]  # ICMP position
         elif protocol == socket.IPPROTO_ICMP:
             pf.features_list = pf.features_list + [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]  # TCP and UDP positions
-            pf.features_list.append(int(pkt.icmp.type))  # ICMP type
+            pf.features_list.append(int(getattr(pkt.icmp, 'type', 0)))  # ICMP type
         else:
             pf.features_list = pf.features_list + [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]  # padding for layer3-only packets (TCP+UDP+ICMP positions)
             tmp_id[4] = 0
@@ -222,8 +230,8 @@ def parse_packet(pkt):
 
         return pf
 
-    except AttributeError as e:
-        # ignore packets that aren't TCP/UDP or IPv4
+    except AttributeError:
+        # If any unexpected attribute error arises, skip this packet
         return None
 
 # Offline preprocessing of pcap files for model training, validation and testing
