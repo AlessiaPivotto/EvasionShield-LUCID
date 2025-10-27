@@ -103,9 +103,9 @@ if __name__ == "__main__":
     m.set_manipulator_params(
         grp_size=100,
         min_time_extend=3.0,
-        max_time_extend=6.0,
+        max_time_extend=10.0,
         max_cft_pkt=1,
-        max_crafted_pkt_prob=0.01
+        max_crafted_pkt_prob=0.05
     )
 
     # Run processing (stats written to <mal_pcap>_statistics.pkl)

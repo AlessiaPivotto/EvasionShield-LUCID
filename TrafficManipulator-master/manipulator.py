@@ -258,7 +258,7 @@
 
 
 
-# # python3 main.py -m example/test.pcap -b example/mimic_set.npy -n example/normalizer.pkl -i example/init.pcap
+# # python3 main.py -m DATASETS/FLATTEN-PCAPS/10-UDP/udp-chunk1.pcap -b example/mimic_set.npy -n example/normalizer.pkl -i example/init.pcap
 
 
 
