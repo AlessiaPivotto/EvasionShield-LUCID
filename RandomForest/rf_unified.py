@@ -430,6 +430,36 @@ class RandomForestUnifiedAnalysis:
 
     # ==================== VISUALIZATION ====================
     
+    def _get_attack_order(self, attack_types):
+        """Get attack types in the correct dataset folder order (00-WebDDoS, 01-LDAP, etc.)"""
+        # Define the standard attack order based on dataset folder naming convention
+        standard_order = [
+            'WebDDoS', 'LDAP', 'Portmap', 'DNS', 'UDPLag', 'NTP', 
+            'SNMP', 'SSDP', 'Syn', 'TFTP', 'UDP', 'NetBIOS', 'MSSQL'
+        ]
+        
+        ordered_attacks = []
+        remaining_attacks = list(attack_types)
+        
+        # First pass: match attacks to standard order
+        for standard_attack in standard_order:
+            for attack in list(remaining_attacks):
+                # Normalize both strings for comparison (remove hyphens, underscores, case)
+                attack_norm = attack.replace('-', '').replace('_', '').lower()
+                standard_norm = standard_attack.replace('-', '').replace('_', '').lower()
+                
+                # Check if the standard attack name is contained in the actual attack name
+                if standard_norm in attack_norm or attack_norm in standard_norm:
+                    ordered_attacks.append(attack)
+                    remaining_attacks.remove(attack)
+                    break  # Move to next standard attack
+        
+        # Add any remaining attacks alphabetically
+        if remaining_attacks:
+            ordered_attacks.extend(sorted(remaining_attacks))
+        
+        return ordered_attacks
+    
     def create_comparison_plots(self, df, plot_type="comparison"):
         """Create comprehensive comparison plots"""
         plt.style.use('default')
@@ -446,7 +476,8 @@ class RandomForestUnifiedAnalysis:
         fig.suptitle('Random Forest Cross-Dataset Comparison Analysis', 
                      fontsize=20, fontweight='bold', y=0.98)
         
-        attack_types = sorted(df['attack_type'].unique())
+        # Use proper attack ordering instead of alphabetical
+        attack_types = self._get_attack_order(df['attack_type'].unique())
         datasets = sorted(df['test_dataset'].unique())
         
         # 1. F1 Score Heatmap
