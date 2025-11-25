@@ -81,6 +81,14 @@ if __name__ == "__main__":
                         help="Max number of packets to process (default: all)")
     parser.add_argument('--heuristic', action='store_true',
                         help="Enable heuristic mode in PSO")
+    parser.add_argument('--fragment', action='store_true',
+                        help="Enable packet fragmentation after manipulation")
+    parser.add_argument('--fragment_prob', type=float, default=1.0,
+                        help="Probability of fragmentation (0.0-1.0, default: 1.0)")
+    parser.add_argument('--min_fragment_size', type=int, default=64,
+                        help="Minimum fragment size in bytes (default: 64)")
+    parser.add_argument('--max_fragment_size', type=int, default=1200,
+                        help="Maximum fragment size in bytes (default: 1200)")
 
     args = parser.parse_args()
 
@@ -91,6 +99,15 @@ if __name__ == "__main__":
         knormer_file=args.normalizer,
         init_pcap_file=args.init_pcap
     )
+    
+    # Set fragmentation parameters if enabled
+    if args.fragment:
+        m.set_fragmentation_params(
+            enable_fragmentation=True,
+            fragment_prob=args.fragment_prob,
+            min_fragment_size=args.min_fragment_size,
+            max_fragment_size=args.max_fragment_size
+        )
 
     # Tuning PSO & manipulator parameters
     max_iter = 3
