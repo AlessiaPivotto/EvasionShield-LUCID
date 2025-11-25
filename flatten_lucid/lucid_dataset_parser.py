@@ -326,6 +326,8 @@ def apply_labels(flows, labelled_flows, bin_labels, mc_labels, traffic_label, tr
                 amin = np.amin(packet_list,axis=0)[0]
                 packet_list[:, 0] = packet_list[:, 0] - amin
 
+        # Add flow ID for traceability
+        flow['flow_id'] = five_tuple
         labelled_flows.append((five_tuple,flow))
 
 # returns the total number of flows
@@ -344,7 +346,12 @@ def count_flows(preprocessed_flows, mc_labels):
     return total_flows, total_fragments, flow_counters, fragment_counters
 
 # balance the dataset based on the number of benign and malicious fragments of flows
-def balance_dataset(flows,mc_labels,samples_per_class=float('inf')):
+def balance_dataset(flows,mc_labels,samples_per_class=float('inf'), disable_balance=False):
+    if disable_balance:
+        # Return all flows without balancing
+        _,_,_,fragment_counters = count_flows(flows,mc_labels)
+        return flows, fragment_counters
+    
     new_flow_list = []
     new_fragment_counters = {key: 0 for key in list(mc_labels.keys())}
 
@@ -388,6 +395,7 @@ def mc_to_int_labels(flows):
 # convert the dataset from dictionaries with 5-tuples keys into a list of flow fragments and another list of labels
 def dataset_to_list_of_fragments(dataset):
     keys = []
+    flow_ids = []
     X = []
     y = []
 
@@ -396,12 +404,15 @@ def dataset_to_list_of_fragments(dataset):
         flow_data = flow[1]
         label = flow_data['label']
         for key, fragment in flow_data.items():
-            if key != 'label' and key != 'label_string':
+            if key != 'label' and key != 'label_string' and key != 'flow_id':
                 X.append(fragment)
                 y.append(label)
                 keys.append(tuple)
+                # Create a readable flow ID string for traceability
+                flow_id_str = f"{tuple[0]}:{tuple[1]}->{tuple[2]}:{tuple[3]}:{tuple[4]}"
+                flow_ids.append(flow_id_str)
 
-    return X,y,keys
+    return X, y, keys, flow_ids
 
 def train_test_split(flow_list,mc_labels, train_size=TRAIN_SIZE, shuffle=True):
     test_list = []
@@ -462,6 +473,7 @@ def main(argv):
 
     parser.add_argument('--dont_normalize', help='Normalize the dataset', action='store_true')
     parser.add_argument('--flatten', help='Flatten the input arrays', action='store_true')
+    parser.add_argument('--no_balance', help='Disable dataset balancing and train/test split', action='store_true')
     parser.add_argument('-mc', '--multiclass', default=0, type=int,
                         help='0=binary, 1=one-hot encoding multiclass, 2=integer multiclass')
 
@@ -598,7 +610,7 @@ def main(argv):
         elif args.multiclass == 2:
             preprocessed_flows, labels = mc_to_int_labels(preprocessed_flows)
 
-        preprocessed_flows, fragment_counters = balance_dataset(preprocessed_flows,labels,args.samples)
+        preprocessed_flows, fragment_counters = balance_dataset(preprocessed_flows,labels,args.samples, disable_balance=args.no_balance)
         total_flows,total_samples,_,_ = count_flows(preprocessed_flows, labels)
         
 
@@ -606,12 +618,19 @@ def main(argv):
             print("Empty dataset!")
             exit()
 
-        preprocessed_train, preprocessed_test = train_test_split(preprocessed_flows,labels, train_size=TRAIN_SIZE, shuffle=True)
-        preprocessed_train, preprocessed_val = train_test_split(preprocessed_train, labels, train_size=TRAIN_SIZE, shuffle=True)
+        if args.no_balance:
+            # Use all data without splitting
+            X_train, y_train, _, flow_ids_train = dataset_to_list_of_fragments(preprocessed_flows)
+            X_val, y_val = X_train, y_train  # Same data for validation
+            X_test, y_test = X_train, y_train  # Same data for testing
+            flow_ids_val, flow_ids_test = flow_ids_train, flow_ids_train
+        else:
+            preprocessed_train, preprocessed_test = train_test_split(preprocessed_flows,labels, train_size=TRAIN_SIZE, shuffle=True)
+            preprocessed_train, preprocessed_val = train_test_split(preprocessed_train, labels, train_size=TRAIN_SIZE, shuffle=True)
 
-        X_train, y_train, _ = dataset_to_list_of_fragments(preprocessed_train)
-        X_val, y_val, _ = dataset_to_list_of_fragments(preprocessed_val)
-        X_test, y_test, _ = dataset_to_list_of_fragments(preprocessed_test)
+            X_train, y_train, _, flow_ids_train = dataset_to_list_of_fragments(preprocessed_train)
+            X_val, y_val, _, flow_ids_val = dataset_to_list_of_fragments(preprocessed_val)
+            X_test, y_test, _, flow_ids_test = dataset_to_list_of_fragments(preprocessed_test)
 
         # obtain 1D samples
         if args.flatten == True:
@@ -645,16 +664,23 @@ def main(argv):
         hf = h5py.File(output_file + '-train.hdf5', 'w')
         hf.create_dataset('set_x', data=norm_X_train_np)
         hf.create_dataset('set_y', data=y_train_np)
+        # Store flow IDs as strings for traceability
+        flow_ids_train_bytes = [fid.encode('utf-8') for fid in flow_ids_train]
+        hf.create_dataset('flow_ids', data=flow_ids_train_bytes)
         hf.close()
 
         hf = h5py.File(output_file + '-val.hdf5', 'w')
         hf.create_dataset('set_x', data=norm_X_val_np)
         hf.create_dataset('set_y', data=y_val_np)
+        flow_ids_val_bytes = [fid.encode('utf-8') for fid in flow_ids_val]
+        hf.create_dataset('flow_ids', data=flow_ids_val_bytes)
         hf.close()
 
         hf = h5py.File(output_file + '-test.hdf5', 'w')
         hf.create_dataset('set_x', data=norm_X_test_np)
         hf.create_dataset('set_y', data=y_test_np)
+        flow_ids_test_bytes = [fid.encode('utf-8') for fid in flow_ids_test]
+        hf.create_dataset('flow_ids', data=flow_ids_test_bytes)
         hf.close()
 
         fragment_string = ''
