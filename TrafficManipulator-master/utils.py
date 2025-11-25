@@ -25,8 +25,8 @@ class KNnormalizer:
         self.norm_max = []
         self.norm_min = []
         for i in range(len(self.FM)):
-            self.norm_max.append(np.ones(len(self.FM[i])) * -np.Inf)
-            self.norm_min.append(np.ones(len(self.FM[i])) * np.Inf)
+            self.norm_max.append(np.ones(len(self.FM[i])) * -np.inf)
+            self.norm_min.append(np.ones(len(self.FM[i])) * np.inf)
 
     def fit_transform(self, X):
         train_Feature = []
