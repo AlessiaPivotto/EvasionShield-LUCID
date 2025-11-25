@@ -24,7 +24,7 @@ for pcap_file in "${pcap_files[@]}"; do
     # full_path="$pcap_file"
     if [[ -f "$full_path" ]]; then
         echo "Processing $full_path"
-        python3 main.py -m "$full_path" -b example/mimic_set.npy -n example/normalizer.pkl -i example/init.pcap
+        python3 main.py -m "$full_path" -b example/mimic_set.npy -n example/normalizer.pkl -i example/init.pcap --fragment --fragment_prob 1.0 --min_fragment_size 64 --max_fragment_size 150
     else
         echo "File $full_path does not exist."
     fi
