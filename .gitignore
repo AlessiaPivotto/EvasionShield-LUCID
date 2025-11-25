@@ -172,6 +172,7 @@ cython_debug/
 
 # Dataset files
 *.data
+*.png
 *.pcap
 *.hdf5
 *.npy
