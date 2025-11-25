@@ -65,7 +65,7 @@ class Particle:
 
         t1 = time.perf_counter()
 
-        self.local_FE = Kitsune(self.pktList, np.Inf, True)
+        self.local_FE = Kitsune(self.pktList, np.inf, True)
         self.local_FE.FE.nstat = safelyCopyNstat(nstat, True)
         self.feature, self.all_feature = RunFE(self.local_FE,
                                                origin_pos=mal_pos)

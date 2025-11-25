@@ -19,7 +19,7 @@ if __name__ == "__main__":
 
     scapyin = rdpcap(pcap_file)
 
-    FE = Fe.Kitsune(scapyin, np.Inf)
+    FE = Fe.Kitsune(scapyin, np.inf)
     feature, _ = RunFE(FE)
 
     print(np.asarray(feature).shape)

@@ -267,6 +267,7 @@ import time
 import pickle as pkl
 import numpy as np
 from scapy.all import rdpcap, wrpcap
+from scapy.layers.inet import IP
 from pso import PSO
 from AfterImageExtractor.FEKitsune import Kitsune
 from AfterImageExtractor.KitsuneTools import RunFE, safelyCopyNstat
@@ -298,7 +299,7 @@ class Manipulator:
 
         # Global feature extractor setup
         init_pkts = rdpcap(init_pcap_file)
-        self.global_FE = Kitsune(init_pkts, np.Inf)
+        self.global_FE = Kitsune(init_pkts, np.inf)
         if init_pcap_file != "./data/empty.pcap":
             RunFE(self.global_FE)
 
@@ -314,6 +315,12 @@ class Manipulator:
         self.w = 0.4
         self.c1 = 0.5
         self.c2 = 1.0
+        
+        # Fragmentation parameters
+        self.enable_fragmentation = False
+        self.fragment_prob = 1.0
+        self.min_fragment_size = 64
+        self.max_fragment_size = 1200
 
         # Statistics containers
         self.STA_X_list = []
@@ -342,6 +349,17 @@ class Manipulator:
         self.w = w
         self.c1 = c1
         self.c2 = c2
+
+    def set_fragmentation_params(
+        self, enable_fragmentation=False, fragment_prob=1.0,
+        min_fragment_size=64, max_fragment_size=1200
+    ):
+        self.enable_fragmentation = enable_fragmentation
+        self.fragment_prob = fragment_prob
+        self.min_fragment_size = min_fragment_size
+        self.max_fragment_size = max_fragment_size
+        print(f"@Manipulator: Fragmentation enabled with prob={fragment_prob}, "
+              f"fragment size range=[{min_fragment_size}, {max_fragment_size}] bytes")
 
     def process(self, start_no=0, limit=None, heuristic=False):
         if limit is None:
@@ -390,7 +408,7 @@ class Manipulator:
             acc_ics_time += ics_time
             last_end_time = cur_end_time
             saved_nstat = self.global_FE.FE.nstat
-            self.global_FE = Kitsune(best_pkts, np.Inf, False)
+            self.global_FE = Kitsune(best_pkts, np.inf, False)
             self.global_FE.FE.nstat = safelyCopyNstat(saved_nstat, False)
             start_fe = time.perf_counter()
             RunFE(self.global_FE)
@@ -419,6 +437,12 @@ class Manipulator:
         self._save_stats()
         # Write manipulated pcap
         all_pkts = [pkt for grp in self.STA_pktList_list for pkt in grp]
+        
+        # Apply fragmentation if enabled
+        if self.enable_fragmentation:
+            print("@Manipulator: Applying packet fragmentation...")
+            all_pkts = self._apply_fragmentation(all_pkts)
+        
         wrpcap(self.output_pcap, all_pkts)
         print(f"Manipulated packets written to {self.output_pcap}")
 
@@ -431,3 +455,66 @@ class Manipulator:
             pkl.dump(self.STA_avg_dis_list, f)
             pkl.dump(self.STA_all_feature_list, f)
         print(f"Statistics saved to {self.stats_file}")
+
+    def _apply_fragmentation(self, packets):
+        """Apply random fragmentation to packets with configurable probability"""
+        from rebuilder import fragment_packet
+        fragmented_packets = []
+        
+        # Statistics
+        total_packets = len(packets)
+        packets_considered = 0
+        packets_fragmented = 0
+        total_fragments_created = 0
+        
+        print(f"  Processing {total_packets} packets with fragmentation probability {self.fragment_prob}")
+        print(f"  Fragment size range: [{self.min_fragment_size}, {self.max_fragment_size}] bytes")
+        
+        for i, pkt in enumerate(packets):
+            # Check if packet is fragmentable (IP packets with sufficient payload size)
+            # Need to account for IP header size (typically 20 bytes)
+            if pkt.haslayer(IP):
+                ip_layer = pkt[IP]
+                ip_header_len = 20 if ip_layer.ihl is None else ip_layer.ihl * 4
+                payload_size = len(pkt) - ip_header_len
+                
+                if payload_size > self.min_fragment_size:
+                    packets_considered += 1
+                    
+                    # Apply fragmentation probability
+                    if np.random.random() <= self.fragment_prob:
+                        print(f"  Fragmenting packet {i+1}/{total_packets} (size: {len(pkt)} bytes)")
+                        fragments = fragment_packet(
+                            pkt, 
+                            self.min_fragment_size, 
+                            self.max_fragment_size
+                        )
+                        
+                        # Only count as fragmented if we actually created multiple fragments
+                        if len(fragments) > 1:
+                            packets_fragmented += 1
+                            total_fragments_created += len(fragments)
+                            fragmented_packets.extend(fragments)
+                        else:
+                            # Packet was too small to fragment, keep original
+                            fragmented_packets.append(pkt)
+                    else:
+                        # Packet not selected for fragmentation due to probability
+                        fragmented_packets.append(pkt)
+                else:
+                    # Packet payload too small for fragmentation
+                    fragmented_packets.append(pkt)
+            else:
+                # Packet not suitable for fragmentation (non-IP or too small)
+                fragmented_packets.append(pkt)
+        
+        # Print fragmentation statistics
+        print(f"@Manipulator: Fragmentation Statistics:")
+        print(f"  Total packets: {total_packets}")
+        print(f"  Fragmentable packets: {packets_considered}")
+        print(f"  Packets actually fragmented: {packets_fragmented}")
+        print(f"  Total fragments created: {total_fragments_created}")
+        print(f"  Final packet count: {len(fragmented_packets)}")
+        print(f"  Fragmentation ratio: {total_fragments_created/total_packets:.2f}x")
+        
+        return fragmented_packets

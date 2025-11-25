@@ -54,7 +54,7 @@ class PSO:
         # print("--@PSO: Executing PSO algorithm...")
 
         FE_time = 0
-        last_glb_best = np.Inf
+        last_glb_best = np.inf
         iter = 0
         while True:
             avg_dis = 0

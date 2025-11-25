@@ -10,7 +10,7 @@ import random
 import numpy as np
 from utils import Unit
 
-random.seed(12345)
+random.seed(42)
 
 
 def decide_has_pkt(crafted_pkt_prob):
