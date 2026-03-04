@@ -1,0 +1,20 @@
+
+\begin{table}[h]
+\centering
+\caption{Cross-Model Performance Comparison Across Attack Scenarios}
+\label{tab:cross_model_comparison}
+\begin{adjustbox}{width=\textwidth}
+\begin{tabular}{llcccccc}
+\hline
+\textbf{Model} & \textbf{Scenario} & \textbf{Accuracy} & \textbf{F1 Score} & \textbf{FNR} & \textbf{FPR} & \textbf{Std Dev} & \textbf{Attacks} \\ \hline
+Random Forest & Baseline & 0.994 & 0.994 & 0.009 & 0.001 & 0.013 & 13 \\
+Random Forest & Manipulated & 0.813 & 0.743 & 0.276 & 0.098 & 0.166 & 13 \\
+LUCID & Baseline & 0.912 & 0.909 & 0.132 & 0.025 & 0.111 & 13 \\
+LUCID & Manipulated & 0.756 & 0.695 & 0.332 & 0.138 & 0.262 & 13 \\
+LUCID & Fragmented & 0.754 & 0.603 & 0.437 & 0.059 & 0.213 & 13 \\
+\hline
+\end{tabular}
+\end{adjustbox}
+\vspace{0.1cm}
+{\small \textit{Note: FNR = False Negative Rate (Evasion Rate), FPR = False Positive Rate. Lower FNR indicates better attack detection.}}
+\end{table}
