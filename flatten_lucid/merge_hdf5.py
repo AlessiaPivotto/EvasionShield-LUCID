@@ -1,32 +1,49 @@
 import h5py
 import numpy as np
+import os
 
-# List of HDF5 files to merge
+# Base directory
+base_dir = '/home/rising/EvasionShield-LUCID/TrafficManipulator-master/DATASETS'
+
+# List of HDF5 files to merge (FRAGMENTED datasets)
 hdf5_files = [
-    # '../TrafficManipulator-master/DATASETS/MANIPULATED-FLATTEN_0/12-MSSQL/10t-100n-DOS2019-flatten-dataset-train.hdf5',
-    # '../TrafficManipulator-master/DATASETS/MANIPULATED-FLATTEN_0/12-MSSQL/10t-100n-DOS2019-flatten-dataset-test.hdf5',
-    # '../TrafficManipulator-master/DATASETS/MANIPULATED-FLATTEN_0/12-MSSQL/10t-100n-DOS2019-flatten-dataset-val.hdf5'
-    '../TrafficManipulator-master/DATASETS/MANIPULATED_FLATTEN_42/00-WebDDoS/10t-100n-DOS2019-flatten-dataset-test.hdf5',
-    '../TrafficManipulator-master/DATASETS/MANIPULATED_FLATTEN_42/01-LDAP/10t-100n-DOS2019-flatten-dataset-test.hdf5',
-    '../TrafficManipulator-master/DATASETS/MANIPULATED_FLATTEN_42/02-Portmap/10t-100n-DOS2019-flatten-dataset-test.hdf5',
-    '../TrafficManipulator-master/DATASETS/MANIPULATED_FLATTEN_42/03-DNS/10t-100n-DOS2019-flatten-dataset-test.hdf5',
-    '../TrafficManipulator-master/DATASETS/MANIPULATED_FLATTEN_42/04-UDPLag/10t-100n-DOS2019-flatten-dataset-test.hdf5',
-    '../TrafficManipulator-master/DATASETS/MANIPULATED_FLATTEN_42/05-NTP/10t-100n-DOS2019-flatten-dataset-test.hdf5',
-    '../TrafficManipulator-master/DATASETS/MANIPULATED_FLATTEN_42/06-SNMP/10t-100n-DOS2019-flatten-dataset-test.hdf5',
-    '../TrafficManipulator-master/DATASETS/MANIPULATED_FLATTEN_42/07-SSDP/10t-100n-DOS2019-flatten-dataset-test.hdf5',
-    '../TrafficManipulator-master/DATASETS/MANIPULATED_FLATTEN_42/08-Syn/10t-100n-DOS2019-flatten-dataset-test.hdf5',
-    '../TrafficManipulator-master/DATASETS/MANIPULATED_FLATTEN_42/09-TFTP/10t-100n-DOS2019-flatten-dataset-test.hdf5',
-    '../TrafficManipulator-master/DATASETS/MANIPULATED_FLATTEN_42/10-UDP/10t-100n-DOS2019-flatten-dataset-test.hdf5',
-    '../TrafficManipulator-master/DATASETS/MANIPULATED_FLATTEN_42/11-NetBIOS/10t-100n-DOS2019-flatten-dataset-test.hdf5',
-    '../TrafficManipulator-master/DATASETS/MANIPULATED_FLATTEN_42/12-MSSQL/10t-100n-DOS2019-flatten-dataset-test.hdf5'
+    f'{base_dir}/MANIPULATED-FLATTEN_42/00-WebDDoS/"10t-100n-DOS2019-flatten-dataset-val.hdf5"',
+    f'{base_dir}/MANIPULATED-FLATTEN_42/01-LDAP/10t-100n-DOS2019-flatten-dataset-val.hdf5',
+    f'{base_dir}/MANIPULATED-FLATTEN_42/02-Portmap/10t-100n-DOS2019-flatten-dataset-val.hdf5',
+    f'{base_dir}/MANIPULATED-FLATTEN_42/03-DNS/10t-100n-DOS2019-flatten-dataset-val.hdf5',
+    f'{base_dir}/MANIPULATED-FLATTEN_42/04-UDPLag/10t-100n-DOS2019-flatten-dataset-val.hdf5',
+    f'{base_dir}/MANIPULATED-FLATTEN_42/05-NTP/10t-100n-DOS2019-flatten-dataset-val.hdf5',
+    f'{base_dir}/MANIPULATED-FLATTEN_42/06-SNMP/10t-100n-DOS2019-flatten-dataset-val.hdf5',
+    f'{base_dir}/MANIPULATED-FLATTEN_42/07-SSDP/10t-100n-DOS2019-flatten-dataset-val.hdf5',
+    f'{base_dir}/MANIPULATED-FLATTEN_42/08-Syn/10t-100n-DOS2019-flatten-dataset-val.hdf5',
+    f'{base_dir}/MANIPULATED-FLATTEN_42/09-TFTP/10t-100n-DOS2019-flatten-dataset-val.hdf5',
+    f'{base_dir}/MANIPULATED-FLATTEN_42/10-UDP/10t-100n-DOS2019-flatten-dataset-val.hdf5',
+    f'{base_dir}/MANIPULATED-FLATTEN_42/11-NetBIOS/10t-100n-DOS2019-flatten-dataset-val.hdf5',
+    f'{base_dir}/MANIPULATED-FLATTEN_42/12-MSSQL/10t-100n-DOS2019-flatten-dataset-val.hdf5'
 ]
 
-# Output merged file
-output_file = '../TrafficManipulator-master/DATASETS/MANIPULATED_FLATTEN_42/10t-100n-DOS2019-flatten-dataset-test.hdf5'
+# Output merged file (create in the same directory as input files)
+output_file = f'{base_dir}/MANIPULATED-FLATTEN_42/10t-100n-DOS2019-flatten-dataset-val.hdf5'
+
+# Check which files exist
+existing_files = []
+for fname in hdf5_files:
+    if os.path.exists(fname):
+        existing_files.append(fname)
+        print(f"Found: {fname}")
+    else:
+        print(f"Missing: {fname}")
+
+print(f"\nMerging {len(existing_files)} files...")
+
+if not existing_files:
+    print("No files found to merge!")
+    exit(1)
 
 # Open output file
 with h5py.File(output_file, 'w') as out_f:
-    for fname in hdf5_files:
+    for fname in existing_files:
+        print(f"Processing: {os.path.basename(fname)}")
         with h5py.File(fname, 'r') as in_f:
             for name in in_f:
                 # If dataset already exists, append data
@@ -39,4 +56,10 @@ with h5py.File(output_file, 'w') as out_f:
                     maxshape = (None,) + data.shape[1:]
                     out_f.create_dataset(name, data=data, maxshape=maxshape, chunks=True)
 
-print(f"Merged files into {output_file}")
+print(f"\nMerged files into {output_file}")
+
+# Print dataset info
+with h5py.File(output_file, 'r') as f:
+    print(f"\nDataset contents:")
+    for key in f.keys():
+        print(f"  {key}: {f[key].shape}")

@@ -151,18 +151,51 @@ def main(argv):
         os.mkdir(OUTPUT_FOLDER)
 
     if args.train is not None:
-        subfolders = glob.glob(args.train[0] + "/*/")
-        if len(subfolders) == 0:  # for the case in which there is only one folder, and this folder is args.dataset_folder[0]
-            subfolders = [args.train[0] + "/"]
+        main_folder = args.train[0].rstrip('/')
+        
+        # First, check if there are general train/val files in the main directory
+        main_train_files = glob.glob(main_folder + "/*-train.hdf5")
+        main_val_files = glob.glob(main_folder + "/*-val.hdf5")
+        
+        print(f"Checking main folder: {main_folder}")
+        print(f"Train files found: {main_train_files}")
+        print(f"Val files found: {main_val_files}")
+        
+        if main_train_files and main_val_files:
+            # Use the general dataset files from the main directory
+            print(f"Found general train/val files in main directory: {main_folder}")
+            subfolders = [main_folder + "/"]
         else:
-            subfolders = sorted(subfolders)
+            # Look for subfolders with individual datasets
+            subfolders = glob.glob(args.train[0] + "/*/")
+            if len(subfolders) == 0:  # for the case in which there is only one folder, and this folder is args.dataset_folder[0]
+                subfolders = [args.train[0] + "/"]
+            else:
+                subfolders = sorted(subfolders)
         
         for full_path in subfolders:
             full_path = full_path.replace("//", "/")  # remove double slashes when needed
             folder = full_path.split("/")[-2]
             dataset_folder = full_path
-            X_train, Y_train = load_dataset(dataset_folder + "/*" + '-train.hdf5')
-            X_val, Y_val = load_dataset(dataset_folder + "/*" + '-val.hdf5')
+            
+            # Try to load from the current folder first
+            try:
+                X_train, Y_train = load_dataset(dataset_folder + "/*" + '-train.hdf5')
+                X_val, Y_val = load_dataset(dataset_folder + "/*" + '-val.hdf5')
+                train_file = glob.glob(dataset_folder + "/*" + '-train.hdf5')[0]
+                print(f"Using dataset files from: {dataset_folder}")
+            except (FileNotFoundError, IndexError):
+                # If files not found in current folder, try parent directory (for subfolder case)
+                parent_folder = os.path.dirname(dataset_folder.rstrip('/'))
+                print(f"Train/Val files not found in {dataset_folder}, trying parent directory {parent_folder}")
+                try:
+                    X_train, Y_train = load_dataset(parent_folder + "/*" + '-train.hdf5')
+                    X_val, Y_val = load_dataset(parent_folder + "/*" + '-val.hdf5')
+                    train_file = glob.glob(parent_folder + "/*" + '-train.hdf5')[0]
+                    print(f"Using dataset files from parent: {parent_folder}")
+                except (FileNotFoundError, IndexError):
+                    print(f"Warning: No train/val files found for {folder}, skipping...")
+                    continue
 
             X_train, Y_train = shuffle(X_train, Y_train, random_state=SEED)
             X_val, Y_val = shuffle(X_val, Y_val, random_state=SEED)
@@ -175,7 +208,6 @@ def main(argv):
                 print(f"Flattened training shape: {X_train.shape}")
 
             # get the time_window and the flow_len from the filename
-            train_file = glob.glob(dataset_folder + "/*" + '-train.hdf5')[0]
             filename = train_file.split('/')[-1].strip()
             time_window = int(filename.split('-')[0].strip().replace('t', ''))
             max_flow_len = int(filename.split('-')[1].strip().replace('n', ''))
