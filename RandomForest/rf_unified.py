@@ -154,20 +154,21 @@ class RandomForestUnifiedAnalysis:
     
     def get_attack_type_from_folder(self, folder_name):
         """Extract attack type from folder name"""
+        # Order matters - check more specific patterns first!
         attack_mapping = {
+            'UDPLag': 'UDPLag',  # Must come before 'UDP' to avoid false matching
             'PortMap': 'PortMap', 'Portmap': 'PortMap',
             'NetBIOS': 'NetBIOS', 
             'LDAP': 'LDAP',
             'MSSQL': 'MSSQL',
-            'UDP': 'UDP',
-            'SYN': 'SYN', 'Syn': 'SYN',
-            'UDPLag': 'UDPLag',
             'WebDDos': 'WebDDoS', 'WebDDoS': 'WebDDoS',
             'TFTP': 'TFTP',
             'NTP': 'NTP',
             'SSDP': 'SSDP',
             'DNS': 'DNS',
-            'SNMP': 'SNMP'
+            'SNMP': 'SNMP',
+            'SYN': 'SYN', 'Syn': 'SYN',
+            'UDP': 'UDP',  # Must come after 'UDPLag' to avoid false matching
         }
         
         folder_lower = folder_name.lower()

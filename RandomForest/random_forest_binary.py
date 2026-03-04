@@ -205,20 +205,27 @@ class RandomForestBinaryClassifier:
         f1 = f1_score(y_test, predictions, average='binary')
         cm = confusion_matrix(y_test, predictions)
         
+        # Calculate False Negative Rate (FNR)
+        # FNR = FN / (FN + TP) = 1 - Recall
+        fnr = 1 - recall
+        
         metrics = {
             'accuracy': accuracy,
             'precision': precision,
             'recall': recall,
             'f1_score': f1,
+            'fnr': fnr,
             'confusion_matrix': cm,
             'evaluation_time': evaluation_time
         }
         
-        # Print results
-        print(f"Test Accuracy: {accuracy:.4f}")
-        print(f"Test Precision: {precision:.4f}")
-        print(f"Test Recall: {recall:.4f}")
-        print(f"Test F1-Score: {f1:.4f}")
+        # Print results - Focus on F1 Score, FNR, and Accuracy
+        print("=== TEST RESULTS ===")
+        print(f"Accuracy: {accuracy:.4f}")
+        print(f"F1-Score: {f1:.4f}")
+        print(f"False Negative Rate (FNR): {fnr:.4f}")
+        print(f"Precision: {precision:.4f}")
+        print(f"Recall: {recall:.4f}")
         print(f"Test Confusion Matrix:\n{cm}")
         print(f"Classification Report:\n{classification_report(y_test, predictions)}")
         
