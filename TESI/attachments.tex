@@ -1,0 +1,496 @@
+\chapter{Complete tables}
+\section{F1 score tables attack per attack}
+\begin{table*}[htbp]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{l|cccccccccccc}
+\hline
+Dataset &
+WebDDoS &
+LDAP &
+PortMap &
+DNS &
+UDP &
+NTP &
+SNMP &
+SSDP &
+SYN &
+TFTP &
+NetBIOS &
+MSSQL \\
+\hline
+BASELINE &
+0.9880 &
+0.9817 &
+1.0000 &
+0.9563 &
+1.0000 &
+0.9999 &
+0.9993 &
+0.9998 &
+0.9982 &
+1.0000 &
+0.9999 &
+1.0000 \\
+\hline
+MANIPULATED &
+0.7317 &
+0.9383 &
+0.9676 &
+0.7338 &
+0.9114 &
+0.5753 &
+0.9251 &
+0.8742 &
+0.0000 &
+0.2225 &
+0.9732 &
+0.9093 \\
+\hline
+FRAGMENTED &
+0.4565 &
+0.7940 &
+0.7807 &
+0.6393 &
+0.4284 &
+0.2048 &
+0.7261 &
+0.8174 &
+0.0001 &
+0.0020 &
+0.7435 &
+0.6998 \\
+\hline
+\end{tabular}
+\caption{Random Forest F1-score across datasets and attack types}
+\label{tab:rf_f1}
+\end{table*}
+
+\begin{table*}[htbp]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{l|ccccccccccccc}
+\hline
+Dataset &
+WebDDoS &
+LDAP &
+Portmap &
+DNS &
+UDPLag &
+NTP &
+SNMP &
+SSDP &
+SYN &
+TFTP &
+UDP &
+NetBIOS &
+MSSQL \\
+\hline
+Baseline &
+0.6500 & 0.8120 & 0.9167 & 0.7018 & 0.9635 & 0.9217 & 0.9594 & 0.9955 & 0.9967 & 1.0000 & 0.9997 & 0.9063 & 0.9999 \\
+\hline
+Manipulated &
+0.1639 & 0.8689 & 0.8792 & 0.8008 & 0.9665 & 0.5289 & 0.8854 & 0.9783 & 0.0000 & 0.2343 & 0.9803 & 0.7714 & 0.9790 \\
+\hline
+Fragmented &
+0.0129 & 0.9346 & 0.9096 & 0.5859 & 0.5617 & 0.0708 & 0.8903 & 0.9444 & 0.0002 & 0.0032 & 0.7688 & 0.8849 & 0.9186 \\
+\hline
+\end{tabular}
+\caption{Lucid F1-score across dataset conditions and attack types}
+\label{tab:lucid_f1}
+\end{table*}
+
+\begin{table*}[htbp]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{l|ccccccccccccc}
+\hline
+Dataset &
+WebDDoS &
+LDAP &
+Portmap &
+DNS &
+UDPLag &
+NTP &
+SNMP &
+SSDP &
+SYN &
+TFTP &
+UDP &
+NetBIOS &
+MSSQL \\
+\hline
+Baseline &
+1.0000 & 0.9936 & 1.0000 & 0.9118 & 0.9925 & 0.9972 & 1.0000 & 0.9992 & 1.0000 & 0.9989 & 0.9996 & 0.9977 & 0.9995 \\
+\hline
+Manipulated &
+0.6429 & 0.9500 & 0.9741 & 0.9094 & 0.9640 & 0.5873 & 0.9678 & 0.9683 & 0.0000 & 0.2341 & 0.9721 & 0.8562 & 0.9774 \\
+\hline
+Fragmented &
+0.4762 & 0.8185 & 0.9022 & 0.8036 & 0.5173 & 0.1775 & 0.8688 & 0.9630 & 0.0002 & 0.0057 & 0.7842 & 0.8720 & 0.8983 \\
+\hline
+\end{tabular}
+\caption{MLP F1-score across dataset conditions and attack types}
+\label{tab:mlp_f1}
+\end{table*}
+
+\clearpage
+\section{FNR tables attack per attack}
+
+\begin{table*}[htbp]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{l|ccccccccccccc}
+\hline
+Dataset &
+WebDDoS &
+LDAP &
+PortMap &
+DNS &
+UDP &
+NTP &
+SNMP &
+SSDP &
+SYN &
+TFTP &
+NetBIOS &
+MSSQL \\
+\hline
+BASELINE &
+0.0000 &
+0.0348 &
+0.0000 &
+0.0822 &
+0.0000 &
+0.0000 &
+0.0000 &
+0.0000 &
+0.0036 &
+0.0000 &
+0.0001 &
+0.0000 \\
+\hline
+MANIPULATED &
+0.4024 &
+0.0912 &
+0.0346 &
+0.3494 &
+0.0554 &
+0.5669 &
+0.0357 &
+0.0955 &
+1.0000 &
+0.8543 &
+0.0295 &
+0.0246 \\
+\hline
+FRAGMENTED &
+0.6656 &
+0.2809 &
+0.3277 &
+0.4309 &
+0.6557 &
+0.8736 &
+0.3786 &
+0.1976 &
+0.9999 &
+0.9988 &
+0.3492 &
+0.3825 \\
+\hline
+\end{tabular}
+\caption{Random Forest FNR across datasets and attack types}
+\label{tab:rf_fnr}
+\end{table*}
+
+\begin{table*}[htbp]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{l|ccccccccccccc}
+\hline
+Dataset &
+WebDDoS &
+LDAP &
+Portmap &
+DNS &
+UDPLag &
+NTP &
+SNMP &
+SSDP &
+SYN &
+TFTP &
+UDP &
+NetBIOS &
+MSSQL \\
+\hline
+Baseline &
+0.0000 & 0.0127 & 0.0000 & 0.1622 & 0.0000 & 0.0000 & 0.0000 & 0.0000 & 0.0000 & 0.0000 & 0.0000 & 0.0030 & 0.0001 \\
+\hline
+Manipulated &
+0.5091 & 0.0052 & 0.0020 & 0.1022 & 0.0252 & 0.5256 & 0.0054 & 0.0111 & 1.0000 & 0.8594 & 0.0009 & 0.0000 & 0.0000 \\
+\hline
+Fragmented &
+0.6791 & 0.2945 & 0.1404 & 0.3077 & 0.6351 & 0.8996 & 0.1925 & 0.0370 & 0.9999 & 0.9969 & 0.3227 & 0.1774 & 0.1462 \\
+\hline
+\end{tabular}
+\caption{MLP FNR across dataset conditions and attack types}
+\label{tab:mlp_fnr}
+\end{table*}
+
+\begin{table*}[htbp]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{l|ccccccccccccc}
+\hline
+Dataset &
+WebDDoS &
+LDAP &
+Portmap &
+DNS &
+UDPLag &
+NTP &
+SNMP &
+SSDP &
+SYN &
+TFTP &
+UDP &
+NetBIOS &
+MSSQL \\
+\hline
+Baseline &
+0.5185 & 0.3165 & 0.0833 & 0.4595 & 0.0000 & 0.1453 & 0.0152 & 0.0023 & 0.0066 & 0.0000 & 0.0006 & 0.1714 & 0.0001 \\
+\hline
+Manipulated &
+0.9091 & 0.1675 & 0.1657 & 0.2883 & 0.0190 & 0.5897 & 0.1597 & 0.0047 & 1.0000 & 0.8603 & 0.0005 & 0.1562 & 0.0000 \\
+\hline
+Fragmented &
+0.9933 & 0.0798 & 0.1356 & 0.5538 & 0.5961 & 0.9627 & 0.1616 & 0.0556 & 0.9999 & 0.9983 & 0.3386 & 0.1669 & 0.1085 \\
+\hline
+\end{tabular}
+\caption{Lucid FNR across dataset conditions and attack types}
+\label{tab:lucid_fnr}
+\end{table*}
+
+
+\chapter{Implementation of the Fragmentation Module}
+\label{appendix:fragmentation_code}
+
+This appendix provides the implementation details of the proposed fragmentation module described in Section~\ref{sec:fragmentation_method}.  
+The code listings are included to ensure full reproducibility of the experimental setup.
+
+\section{Orchestration Logic (\texttt{manipulator.py})}
+\label{sec:manipulator_code}
+The following method applies probabilistic fragmentation to a stream of packets after PSO-based optimization.
+
+\begin{lstlisting}[language=Python, caption={Probabilistic fragmentation orchestration.}, label={lst:apply_fragmentation}]
+def _apply_fragmentation(self, packets):
+    """Apply random fragmentation to packets with configurable probability"""
+    from rebuilder import fragment_packet
+    fragmented_packets = []
+    
+    for i, pkt in enumerate(packets):
+        if pkt.haslayer(IP):
+            ip_layer = pkt[IP]
+            ip_header_len = 20 if ip_layer.ihl is None else ip_layer.ihl * 4
+            payload_size = len(pkt) - ip_header_len
+            
+            if payload_size > self.min_fragment_size:
+                if np.random.random() <= self.fragment_prob:
+                    fragments = fragment_packet(
+                        pkt, 
+                        self.min_fragment_size, 
+                        self.max_fragment_size
+                    )
+                    fragmented_packets.extend(fragments)
+                else:
+                    fragmented_packets.append(pkt)
+            else:
+                fragmented_packets.append(pkt)
+        else:
+            fragmented_packets.append(pkt)
+            
+    return fragmented_packets
+\end{lstlisting}
+
+\clearpage
+\section{Fragment Construction Logic (\texttt{rebuilder.py})}
+\label{sec:rebuilder_code}
+
+The following function performs RFC 791-compliant IP fragmentation with randomized fragment sizes.
+
+\begin{lstlisting}[language=Python, caption={RFC-compliant stochastic IP fragmentation.}, label={lst:fragment_packet}]
+def fragment_packet(pkt, min_fragment_size=64, max_fragment_size=1200):
+    payload = bytes(pkt)[ip_header_len:]
+    fragment_id = random.randint(1, 65535)
+    payload_offset = 0
+    fragments = []
+    
+    while payload_offset < len(payload):
+        remaining_payload = len(payload) - payload_offset
+        can_create_another = remaining_payload > (2 * min_fragment_size)
+        
+        if not can_create_another:
+            fragment_payload_size = remaining_payload
+            more_fragments = False
+        else:
+            max_allowed_size = min(max_fragment_size, 
+                                   remaining_payload - min_fragment_size)
+            fragment_payload_size = random.randint(
+                min_fragment_size, max_allowed_size
+            )
+            more_fragments = True
+        
+        # Enforce 8-byte alignment (except final fragment)
+        if more_fragments and fragment_payload_size % 8 != 0:
+            fragment_payload_size = (fragment_payload_size // 8) * 8
+        
+        fragment_pkt = IP()
+        fragment_pkt.id = fragment_id
+        fragment_pkt.flags = 'MF' if more_fragments else 0
+        fragment_pkt.frag = payload_offset // 8
+        
+        fragments.append(fragment_pkt)
+        payload_offset += fragment_payload_size
+        
+    return fragments
+\end{lstlisting}
+
+\clearpage
+\chapter{Complete comparison tables}
+\section{F1-score comparison}
+
+\begin{table*}[htbp]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+
+\resizebox{\textwidth}{!}{
+\begin{tabular}{l|ccc|ccc|ccc}
+\hline
+\textbf{Attack} &
+\multicolumn{3}{c|}{\textbf{Random Forest}} &
+\multicolumn{3}{c|}{\textbf{Lucid}} &
+\multicolumn{3}{c}{\textbf{MLP}} \\
+\cline{2-10}
+&
+Base & Manip & Frag &
+Base & Manip & Frag &
+Base & Manip & Frag \\
+\hline
+WebDDoS  & 0.9880 & 0.7317 & 0.4565 & 0.6500 & 0.1639 & 0.0129 & 1.0000 & 0.6429 & 0.4762 \\
+LDAP     & 0.9817 & 0.9383 & 0.7940 & 0.8120 & 0.8689 & 0.9346 & 0.9936 & 0.9500 & 0.8185 \\
+PortMap  & 1.0000 & 0.9676 & 0.7807 & 0.9167 & 0.8792 & 0.9096 & 1.0000 & 0.9741 & 0.9022 \\
+DNS      & 0.9563 & 0.7338 & 0.6393 & 0.7018 & 0.8008 & 0.5859 & 0.9118 & 0.9094 & 0.8036 \\
+UDPLag   & 1.0000 & 0.9115 & 0.4284 & 0.9635 & 0.9665 & 0.5617 & 0.9925 & 0.9640 & 0.5173 \\
+UDP      & 1.0000 & 0.9114 & 0.4284 & 0.9997 & 0.9803 & 0.7688 & 0.9996 & 0.9721 & 0.7842 \\
+NTP      & 0.9999 & 0.5753 & 0.2048 & 0.9217 & 0.5289 & 0.0708 & 0.9972 & 0.5873 & 0.1775 \\
+SNMP     & 0.9993 & 0.9251 & 0.7261 & 0.9594 & 0.8854 & 0.8903 & 1.0000 & 0.9678 & 0.8688 \\
+SSDP     & 0.9998 & 0.8742 & 0.8174 & 0.9955 & 0.9783 & 0.9444 & 0.9992 & 0.9683 & 0.9630 \\
+SYN      & 0.9982 & 0.0000 & 0.0001 & 0.9967 & 0.0000 & 0.0002 & 1.0000 & 0.0000 & 0.0002 \\
+TFTP     & 1.0000 & 0.2225 & 0.0020 & 1.0000 & 0.2343 & 0.0032 & 0.9989 & 0.2341 & 0.0057 \\
+NetBIOS  & 0.9999 & 0.9732 & 0.7435 & 0.9063 & 0.7714 & 0.8849 & 0.9977 & 0.8562 & 0.8720 \\
+MSSQL    & 1.0000 & 0.9093 & 0.6998 & 0.9999 & 0.9790 & 0.9186 & 0.9995 & 0.9774 & 0.8983 \\
+\hline
+\end{tabular}
+}
+
+\caption{F1-score comparison across models under Baseline, Manipulated, and Fragmented conditions.}
+\label{tab:merged_f1}
+\end{table*}
+
+\clearpage
+\section{FNR comparison}
+\begin{table*}[htbp]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+
+\resizebox{\textwidth}{!}{
+\begin{tabular}{l|ccc|ccc|ccc}
+\hline
+\textbf{Attack} &
+\multicolumn{3}{c|}{\textbf{Random Forest}} &
+\multicolumn{3}{c|}{\textbf{MLP}} &
+\multicolumn{3}{c}{\textbf{Lucid}} \\
+\cline{2-10}
+&
+Base & Manip & Frag &
+Base & Manip & Frag &
+Base & Manip & Frag \\
+\hline
+WebDDoS  & 0.0000 & 0.4024 & 0.6656 & 0.0000 & 0.5091 & 0.6791 & 0.5185 & 0.9091 & 0.9933 \\
+LDAP     & 0.0348 & 0.0912 & 0.2809 & 0.0127 & 0.0052 & 0.2945 & 0.3165 & 0.1675 & 0.0798 \\
+PortMap  & 0.0000 & 0.0346 & 0.3277 & 0.0000 & 0.0020 & 0.1404 & 0.0833 & 0.1657 & 0.1356 \\
+DNS      & 0.0822 & 0.3494 & 0.4309 & 0.1622 & 0.1022 & 0.3077 & 0.4595 & 0.2883 & 0.5538 \\
+UDPLag   & 0.0000 & 0.0554 & 0.6557 & 0.0000 & 0.0252 & 0.6351 & 0.0000 & 0.0190 & 0.5961 \\
+UDP      & 0.0000 & 0.0554 & 0.6557 & 0.0000 & 0.0009 & 0.3227 & 0.0006 & 0.0005 & 0.3386 \\
+NTP      & 0.0000 & 0.5669 & 0.8736 & 0.0000 & 0.5256 & 0.8996 & 0.1453 & 0.5897 & 0.9627 \\
+SNMP     & 0.0000 & 0.0357 & 0.3786 & 0.0000 & 0.0054 & 0.1925 & 0.0152 & 0.1597 & 0.1616 \\
+SSDP     & 0.0000 & 0.0955 & 0.1976 & 0.0000 & 0.0111 & 0.0370 & 0.0023 & 0.0047 & 0.0556 \\
+SYN      & 0.0036 & 1.0000 & 0.9999 & 0.0000 & 1.0000 & 0.9999 & 0.0066 & 1.0000 & 0.9999 \\
+TFTP     & 0.0000 & 0.8543 & 0.9988 & 0.0000 & 0.8594 & 0.9969 & 0.0000 & 0.8603 & 0.9983 \\
+NetBIOS  & 0.0001 & 0.0295 & 0.3492 & 0.0030 & 0.0000 & 0.1774 & 0.1714 & 0.1562 & 0.1669 \\
+MSSQL    & 0.0000 & 0.0246 & 0.3825 & 0.0001 & 0.0000 & 0.1462 & 0.0001 & 0.0000 & 0.1085 \\
+\hline
+\end{tabular}
+}
+
+\caption{False Negative Rate across models under Baseline, Manipulated, and Fragmented conditions.}
+\label{tab:merged_fnr}
+\end{table*}
+
+
+
+\begin{table}[h]
+\centering
+\caption{FNR Comparison Table (Exact Values per Attack) after adversarial training}
+\begin{tabular}{lccc}
+\hline
+\textbf{Attack} & \textbf{Baseline} & \textbf{Manipulated} & \textbf{Fragmented} \\
+\hline
+WebDDoS  & 0.0000 & 0.1455 & 0.0080 \\
+LDAP     & 0.0127 & 0.0052 & 0.0061 \\
+Portmap  & 0.0000 & 0.0031 & 0.0024 \\
+DNS      & 0.2432 & 0.1387 & 0.2615 \\
+UDPLag   & 0.0000 & 0.0068 & 0.0244 \\
+NTP      & 0.0028 & 0.1410 & 0.0198 \\
+SNMP     & 0.0000 & 0.0046 & 0.0204 \\
+SSDP     & 0.0015 & 0.0000 & 0.0000 \\
+Syn      & 0.0000 & 0.0000 & 0.0000 \\
+TFTP     & 0.0000 & 0.0005 & 0.0000 \\
+UDP      & 0.0000 & 0.0000 & 0.0955 \\
+NetBIOS  & 0.0038 & 0.0000 & 0.0183 \\
+MSSQL    & 0.0001 & 0.0000 & 0.0000 \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[h]
+\centering
+\caption{FNR Comparison Table (adv training with only manip and baseline)}
+\begin{tabular}{lccc}
+\hline
+\textbf{Attack} & \textbf{Baseline} & \textbf{Manipulated} & \textbf{Fragmented} \\
+\hline
+WebDDoS  & 0.1111 & 0.1273 & 0.6150 \\
+LDAP     & 0.0000 & 0.0052 & 0.0368 \\
+Portmap  & 0.0000 & 0.0006 & 0.1356 \\
+DNS      & 0.0000 & 0.0547 & 0.3077 \\
+UDPLag   & 0.0000 & 0.0075 & 0.4568 \\
+NTP      & 0.0000 & 0.1667 & 0.7130 \\
+SNMP     & 0.0000 & 0.0037 & 0.1517 \\
+SSDP     & 0.0000 & 0.0032 & 0.0000 \\
+Syn      & 0.0000 & 0.0000 & 0.0001 \\
+TFTP     & 0.0000 & 0.0005 & 0.0007 \\
+UDP      & 0.0000 & 0.0000 & 0.3273 \\
+NetBIOS  & 0.0010 & 0.0000 & 0.1597 \\
+MSSQL    & 0.0001 & 0.0000 & 0.1439 \\
+\hline
+\end{tabular}
+\end{table}

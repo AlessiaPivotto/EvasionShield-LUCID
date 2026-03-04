@@ -1,0 +1,518 @@
+\chapter{Experimental Evaluation}
+\label{cha:evaluation}
+In this chapter, the efficacy of packet fragmentation as an evasion technique against NIDS is assessed. 
+
+To evaluate the individual contribution of packet fragmentation, the detection performance is compared across the following three cases: the original traffic, the traffic manipulated by the original framework, and the traffic manipulated by packet fragmentation in combination with the existing transformations.
+The results of the study reveal that packet fragmentation indeed contributes to the overall performance degradation.
+This is expected, as the feature-level manipulation affects the statistical properties of the traffic, while the packet fragmentation affects the actual packet structure, thereby leading to compounded evasion when the two transformations are combined.
+This further confirms that the performance improvements obtained by the proposed extension are not incremental but, rather, arise from the exploitation of a different vulnerability in the NIDS processing pipeline.
+
+\section{Experimental Setup}
+
+All experiments are based on network traffic data from the CICIDS2019 dataset, which represents a wide range of benign and malicious network traffic.
+
+Three detection models are considered to assess their performance against packet fragmentation, each based on different machine learning paradigms: a Random Forest (RF), a Multi-Layer Perceptron (MLP), and LUCID. 
+The choice of these models enables a comprehensive evaluation. 
+
+% DA SPOSTARE IN METHODOLOGY I THINK 
+%Traffic data is preprocessed uniformly across all experiments. The raw network traffic data is first converted to bidirectional flows based on a five-tuple identifier. The time window is set to 10 seconds, and a maximum of 100 packets is allowed per flow. 
+%For all the models, the packet matrices are flattened to fixed-length feature vectors. 
+
+% In methodology ricordati di inserire un disegno che spieghi come si forma il dataset, tipo quello che c'è nel paper del manipulator
+
+Detection performance is evaluated using standard classification metrics, including Accuracy, F1-score, and FNR.
+Given the adversarial setting, particular emphasis is placed on the latter, as it directly quantifies the success of evasion attacks by measuring the proportion of malicious traffic incorrectly classified as benign.
+All models are evaluated on identical test sets to ensure a fair comparison between baseline traffic, manipulated traffic, and fragmentation-enhanced traffic.
+
+The evaluation involves three primary dataset configurations:
+\begin{itemize}
+    \item \textbf{Baseline}: Represents the standard performance of the NIDS on the original, unmodified dataset. It serves as the ground truth for evaluating the effectiveness of the attacks.
+    \item \textbf{Original Manipulator}: Contains traffic generated using the original traffic manipulation strategy, which employs a combination of GAN and PSO to perturb traffic features.
+    \item \textbf{Fragmentation Enhanced}: Contains traffic generated with the improved manipulator that integrates random packet fragmentation after the manipulation.
+\end{itemize}
+
+\section{Baseline Performance}
+
+The baseline evaluation investigates the detection performance of each model under normal traffic conditions, for which no adversarial manipulation is applied.
+This will provide a standard operational behavior setting and can be used for comparison in further adversarial experiments.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lccc}
+\hline
+Model & F1 Score & FNR & Accuracy \\
+\hline
+MLP   & 0.9987 & 0.0014 & 0.9987 \\
+RF    & 0.9999 & 0.0001 & 0.9999 \\
+LUCID & 0.9757 & 0.0466 & 0.9763 \\
+\hline
+\end{tabular}
+\caption{Performance on the Baseline Dataset}
+\label{tab:baseline}
+\end{table}
+
+The results in Table~\ref{tab:baseline} point towards very good detection performance, expressed by high accuracy and F1-scores-along with low numbers of false negatives in each model tested.
+MLP and RF's performance is near perfect, indicating that the models perform well at identifying known attack patterns when the distribution of input data is unchanged.
+
+But most of the time, LUCID demonstrates slightly worse absolute values of performance metrics, since its results remain stable and consistent, due to capturing temporal dependencies between packets.
+This temporal modeling capability is of particular significance in network traffic analysis, whereby sequential patterns form a keystone. Overall, the baseline results confirm that all selected models were well-trained and reliably operating under benign conditions. Importantly, this test sets a very strong point of reference: any subsequent decrease in performance due to the applied adversarial attacks can be attributed to the attack itself rather than a failure in model training or the quality of the dataset.
+
+\section{Performance Under the Original Manipulator}
+
+This section discusses the evaluation of the impact of the original traffic manipulation framework on NIDS performance.
+
+Table~\ref{tab:manipulated} summarizes the overall performance on the manipulated dataset. A consistent degradation is observed across all models, characterized by increased False Negative Rates (FNR) and reduced F1-scores and accuracy. The elevated FNR values indicate a higher tendency to misclassify malicious traffic as benign, confirming the effectiveness of the manipulation strategy in inducing evasion.
+
+The Random Forest and MLP classifiers exhibit substantial performance deterioration. Since both models rely primarily on aggregated statistical flow features, their decision boundaries are directly influenced by feature-space perturbations. The observed degradation suggests that controlled modifications of high-level descriptors, such as packet counts, byte distributions, and flow timing statistics, can significantly alter the feature representation in ways that reduce separability between benign and malicious samples.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lccc}
+\hline
+Model & F1 Score & FNR & Accuracy \\
+\hline
+MLP   & 0.8949 & 0.1417 & 0.8996 \\
+RF    & 0.8849 & 0.1780 & 0.8935 \\
+LUCID & 0.8536 & 0.2103 & 0.8650 \\
+\hline
+\end{tabular}
+\caption{Performance on the Manipulated Dataset}
+\label{tab:manipulated}
+\end{table}
+
+LUCID shows the largest overall degradation, with the highest FNR and the lowest F1-score among the evaluated models. Although LUCID incorporates temporal modeling of packet sequences, the results indicate that temporal awareness alone does not guarantee robustness against structured manipulation. The applied transformations appear sufficient to distort both statistical summaries and temporal patterns, thereby impairing the model’s ability to capture discriminative traffic dynamics.
+
+A more granular view is provided in Table~\ref{tab:fnr_base_manip}, which compares per-attack FNR values under baseline and manipulated conditions. The impact of the manipulator is highly uneven across attack classes. Several attacks, including WebDDoS, DNS, NTP, SYN, and TFTP, exhibit dramatic increases in FNR across all models. In extreme cases (e.g., SYN and TFTP), FNR values approach or reach 1.0, indicating near-complete evasion. These results suggest that detection of such attacks depends heavily on structural and statistical properties that can be effectively altered through feature-space manipulation.
+
+\begin{table*}[htbp]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+
+\resizebox{0,8\textwidth}{!}{
+\begin{tabular}{l|cc|cc|cc}
+\hline
+\textbf{Attack} &
+\multicolumn{2}{c|}{\textbf{Random Forest}} &
+\multicolumn{2}{c|}{\textbf{MLP}} &
+\multicolumn{2}{c}{\textbf{Lucid}} \\
+\cline{2-7}
+&
+Base & Manip &
+Base & Manip &
+Base & Manip \\
+\hline
+WebDDoS  & 0.0000 & 0.4024 & 0.0000 & 0.5091 & 0.5185 & 0.9091 \\
+LDAP     & 0.0348 & 0.0912 & 0.0127 & 0.0052 & 0.3165 & 0.1675 \\
+PortMap  & 0.0000 & 0.0346 & 0.0000 & 0.0020 & 0.0833 & 0.1657 \\
+DNS      & 0.0822 & 0.3494 & 0.1622 & 0.1022 & 0.4595 & 0.2883 \\
+UDPLag   & 0.0000 & 0.0554 & 0.0000 & 0.0252 & 0.0000 & 0.0190 \\
+UDP      & 0.0000 & 0.0554 & 0.0000 & 0.0009 & 0.0006 & 0.0005 \\
+NTP      & 0.0000 & 0.5669 & 0.0000 & 0.5256 & 0.1453 & 0.5897 \\
+SNMP     & 0.0000 & 0.0357 & 0.0000 & 0.0054 & 0.0152 & 0.1597 \\
+SSDP     & 0.0000 & 0.0955 & 0.0000 & 0.0111 & 0.0023 & 0.0047 \\
+SYN      & 0.0036 & 1.0000 & 0.0000 & 1.0000 & 0.0066 & 1.0000 \\
+TFTP     & 0.0000 & 0.8543 & 0.0000 & 0.8594 & 0.0000 & 0.8603 \\
+NetBIOS  & 0.0001 & 0.0295 & 0.0030 & 0.0000 & 0.1714 & 0.1562 \\
+MSSQL    & 0.0000 & 0.0246 & 0.0001 & 0.0000 & 0.0001 & 0.0000 \\
+\hline
+\end{tabular}
+}
+\caption{False Negative Rate comparison across models under Baseline and Manipulated conditions.}
+\label{tab:fnr_base_manip}
+\end{table*}
+
+In contrast, other attack types, such as SSDP, SNMP, and MSSQL, demonstrate comparatively greater resilience. Although some degradation is present, their FNR increases are more moderate and detection performance remains relatively stable. This behavior implies that these attacks possess stronger or more invariant characteristics, potentially including protocol-specific semantics, distinctive traffic signatures, or persistent volumetric patterns that are less sensitive to moderate feature perturbations.
+
+Certain protocol-constrained attacks (e.g., LDAP and PortMap) show partial but not catastrophic degradation. This indicates that while feature-level manipulation can obscure statistical regularities, it may be insufficient to fully mask attacks whose detection implicitly relies on protocol behavior or flow-level structural consistency.
+
+Overall, these findings reveal a fundamental limitation of the original evasion framework. By operating exclusively at the feature level, the manipulator targets post-processed statistical representations rather than earlier stages of the NIDS pipeline, such as packet parsing, state tracking, or flow reconstruction. Consequently, its evasion capability remains constrained and uneven across attack types and model architectures.
+
+\section{Impact of Fragmentation-Enhanced Attacks}
+Unlike purely feature-level perturbations, fragmentation introduces structural modifications that directly affect how traffic is processed during packet reassembly and flow construction. This additional evasion layer significantly increases the complexity of the detection task.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lccc}
+\hline
+Model & F1 Score & FNR & Accuracy \\
+\hline
+MLP   & 0.1826 & 0.8922 & 0.5551 \\
+RF    & 0.0306 & 0.9837 & 0.5237 \\
+LUCID & 0.1695 & 0.9005 & 0.5504 \\
+\hline
+\end{tabular}
+\caption{Performance on the Fragmented Dataset}
+\label{tab:fragmented}
+\end{table}
+
+
+TODO: da giustificare la differenza, potrebbe servire la confusion matrix:
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{IMG/ConfusionMatrix.png}
+    \caption{Confusion matrix }
+    \label{fig:confusion_matrix}
+\end{figure}
+
+
+Table~\ref{tab:fragmented} summarizes the overall performance on the fragmented dataset. The degradation is substantial across all models. F1-scores collapse to below 0.20 for every architecture, while FNR surge above 0.89 and reach 0.9837 for the Random Forest model. Overall accuracy drops to nearly random-classification levels (approximately 52--56\%), indicating that fragmentation severely undermines the discriminative capability of all evaluated detectors.
+
+The fragmentation-enhanced manipulator preserves protocol compliance and attack semantics while subdividing packets into multiple fragments. This transformation alters packet counts, payload distributions, inter-arrival times, and flow lengths, thereby distorting both statistical summaries and temporal structure. Because most NIDS pipelines rely on assumptions about packet continuity and coherent flow construction, fragmentation disrupts intermediate processing stages before classification even occurs.
+
+Compared to the original manipulator, fragmentation consistently produces markedly higher FNR values across nearly all attack categories (Table~\ref{tab:fnr_manip_frag}). For many attacks, including WebDDoS, NTP, UDPLag, and DNS, the shift from manipulated to fragmented traffic results in dramatic additional increases in FNR. In extreme cases such as SYN and TFTP floods, detection performance effectively collapses across all models, with FNR values approaching one. These results demonstrate that structural perturbations amplify evasion effectiveness far beyond what is achievable through feature-level manipulation alone.
+
+\begin{table*}[htbp]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+
+\resizebox{0,8\textwidth}{!}{
+\begin{tabular}{l|cc|cc|cc}
+\hline
+\textbf{Attack} &
+\multicolumn{2}{c|}{\textbf{Random Forest}} &
+\multicolumn{2}{c|}{\textbf{MLP}} &
+\multicolumn{2}{c}{\textbf{Lucid}} \\
+\cline{2-7}
+&
+Manip & Frag &
+Manip & Frag &
+Manip & Frag \\
+\hline
+WebDDoS  & 0.4024 & 0.6656 & 0.5091 & 0.6791 & 0.9091 & 0.9933 \\
+LDAP     & 0.0912 & 0.2809 & 0.0052 & 0.2945 & 0.1675 & 0.0798 \\
+PortMap  & 0.0346 & 0.3277 & 0.0020 & 0.1404 & 0.1657 & 0.1356 \\
+DNS      & 0.3494 & 0.4309 & 0.1022 & 0.3077 & 0.2883 & 0.5538 \\
+UDPLag   & 0.0554 & 0.6557 & 0.0252 & 0.6351 & 0.0190 & 0.5961 \\
+UDP      & 0.0554 & 0.6557 & 0.0009 & 0.3227 & 0.0005 & 0.3386 \\
+NTP      & 0.5669 & 0.8736 & 0.5256 & 0.8996 & 0.5897 & 0.9627 \\
+SNMP     & 0.0357 & 0.3786 & 0.0054 & 0.1925 & 0.1597 & 0.1616 \\
+SSDP     & 0.0955 & 0.1976 & 0.0111 & 0.0370 & 0.0047 & 0.0556 \\
+SYN      & 1.0000 & 0.9999 & 1.0000 & 0.9999 & 1.0000 & 0.9999 \\
+TFTP     & 0.8543 & 0.9988 & 0.8594 & 0.9969 & 0.8603 & 0.9983 \\
+NetBIOS  & 0.0295 & 0.3492 & 0.0000 & 0.1774 & 0.1562 & 0.1669 \\
+MSSQL    & 0.0246 & 0.3825 & 0.0000 & 0.1462 & 0.0000 & 0.1085 \\
+\hline
+\end{tabular}
+}
+
+\caption{False Negative Rate across models under Manipulated and Fragmented conditions.}
+\label{tab:fnr_manip_frag}
+\end{table*}
+
+Models relying on aggregated or flattened statistical representations are particularly vulnerable. For Random Forest and MLP, fragmentation drastically inflates flow-level features (e.g., packet counts and timing dispersion), thereby shifting samples outside the learned decision boundaries. However, even LUCID, despite its sequence-aware design, experiences severe degradation. Fragmentation breaks packet-sequence continuity and distorts temporal dependencies, weakening the coherence of learned attack signatures. Consequently, fragmented malicious traffic increasingly resembles benign communication patterns in both statistical and temporal dimensions.
+
+Although the degradation is widespread, variability across attack types remains observable. Attacks characterized by high-volume flooding behavior (e.g., NTP and WebDDoS) exhibit near complete evasion under fragmentation. Others, such as SNMP or MSSQL, still show degradation but to a comparatively lesser extent, suggesting partial robustness due to stronger protocol-specific characteristics. Nonetheless, no model demonstrates meaningful resilience under fragmented conditions.
+
+Overall, these findings highlight the critical role of structural assumptions within NIDS pipelines. Packet fragmentation operates at an earlier stage than feature manipulation, targeting flow reconstruction and temporal coherence before classification occurs. By disrupting these foundational processing steps, fragmentation acts as a highly effective evasion mechanism that generalizes across heterogeneous detection architectures.
+
+\section{Robustness Analysis}
+
+This section analyzes the robustness of the evaluated architectures against fragmentation-based evasion, focusing on how different modeling assumptions interact with disrupted traffic representations.
+
+The experimental results reveal a clear stratification among model families. Tree-based models and fully connected neural networks exhibit the highest sensitivity to fragmentation-based manipulation. These architectures primarily rely on aggregated, flow-level statistical features, such as packet counts, size distributions, and inter-arrival times, all of which are significantly distorted when packet fragmentation is introduced. As a result, their decision boundaries are strongly affected by structural perturbations that do not alter the underlying malicious semantics of the traffic.
+
+Sequence-aware models, such as LUCID, demonstrate a higher degree of robustness under fragmentation. By incorporating temporal ordering and local dependencies, these models retain partial discriminative capability even when packet continuity is disrupted. Nevertheless, the results show that fragmentation remains an effective evasion mechanism even against sequence-based architectures, particularly when temporal coherence is sufficiently degraded. This indicates that sequence awareness alone is insufficient to guarantee robustness when the assumptions about packet continuity and flow reconstruction are violated.
+
+A key observation emerging from this analysis is that architectural complexity does not inherently imply robustness. Instead, robustness depends on the alignment between the model’s inductive biases and the actual traffic representation processed by the NIDS. Fragmentation-based evasion exploits a fundamental discrepancy between packet-level network reality and the feature-level abstractions used by learning-based detectors. This discrepancy persists even in advanced deep learning models, underscoring that robustness is primarily a systems-level property rather than a function of model depth or capacity.
+
+From a defensive perspective, these findings highlight the necessity of detection strategies that explicitly address this representation gap. Approaches such as robust and protocol-aware packet reassembly, multi-resolution feature extraction, and adversarially informed training regimes emerge as essential components for improving resilience against fragmentation-based evasion.
+Model Robustness Comparison
+
+While Random Forest generally achieved the strongest baseline performance, it exhibited significant vulnerability under manipulated and fragmented conditions. The MLP model showed similar fragility, particularly under fragmentation, where it failed entirely to detect certain attack types. Lucid, although exhibiting lower baseline performance overall, demonstrated marginally improved robustness for a small subset of attacks under fragmented conditions. Nevertheless, it also failed catastrophically for SYN, TFTP, and NTP attacks.
+
+These observations indicate that architectural differences alone are insufficient to ensure robustness against traffic transformation. None of the evaluated models consistently maintained acceptable detection performance under fragmentation, underscoring a systemic limitation rather than a model-specific weakness.
+\\
+
+From a practical security perspective, the observed increase in FNR is particularly concerning. High FNR values imply that attacks remain undetected, posing a significant risk in real-world deployments. The results demonstrate that high accuracy on clean or baseline datasets can provide a false sense of security, as attackers can exploit simple and well-known traffic manipulation techniques to evade detection.
+
+The findings emphasize the need for intrusion detection systems that are resilient to realistic network behaviors, including packet fragmentation and adversarial traffic transformations. Without such robustness, ML-based IDS solutions remain vulnerable to evasion, limiting their effectiveness in operational environments.
+
+\section{Statistical Considerations}
+
+All experimental evaluations are conducted using a consistent dataset, preprocessing pipeline, and evaluation protocol to ensure fair comparison across models and manipulation scenarios. This controlled setup isolates the impact of fragmentation and other adversarial transformations, allowing meaningful comparative analysis.
+
+Nevertheless, several factors may influence the observed performance trends. The CICIDS2019 dataset exhibits inherent class imbalance, and different attack categories vary substantially in traffic volume and behavioral complexity. Additionally, network traffic is inherently non-stationary, and models trained on static datasets may not fully capture evolving attack strategies or background traffic patterns.
+
+In this work, the FNR is prioritized as the primary evaluation metric due to its critical importance in adversarial and operational security contexts, where missed detections carry substantially higher risk than false alarms. While an increase in evasion success may be associated with changes in the false positive rate, the primary objective of fragmentation-based evaluation is to assess a model’s susceptibility to attack concealment rather than overall classification balance.
+
+Future work may strengthen the statistical validity of these findings through repeated experimental runs, confidence interval estimation, and cross-dataset validation. Despite these limitations, the consistency of the observed trends across architectures and manipulation scenarios provides compelling evidence that packet fragmentation significantly increases evasion success and constitutes a critical challenge for contemporary NIDS.
+
+\section{Ablation Study and Design Validation}
+
+The ablation study further validates the design choice of integrating packet fragmentation as a first-class manipulation primitive rather than treating it as a secondary or optional transformation.
+
+A direct comparison among the \texttt{BASELINE}, \texttt{MANIPULATED}, and \texttt{FRAGMENTED} scenarios reveals a clear and progressive degradation in NIDS robustness. While statistical manipulation alone already reduces detection performance, the introduction of fragmentation consistently amplifies evasion success across models and attack categories.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth]{IMG/performance_comparison.png}
+    \caption{Comparison of detection performance across Baseline, Manipulated, and Fragmented datasets for MLP, RF, and LUCID. The grouped bar charts report F1-score, FNR, and Accuracy.}
+    \label{fig:placeholder}
+\end{figure}
+
+Notably, the \texttt{FRAGMENTED} scenario consistently outperforms the \texttt{MANIPULATED} scenario in terms of evasion effectiveness. This indicates that modern NIDS, which often rely on features derived from packet headers and flow-level statistics, are particularly vulnerable to adversarial strategies that alter packet structure while preserving higher-level flow semantics. Fragmentation disrupts size-based, timing-based, and aggregation-dependent features without invalidating the underlying attack behavior, thereby exposing a fundamental weakness in feature extraction pipelines.
+
+These results confirm that fragmentation is not merely an auxiliary perturbation but a structurally impactful evasion mechanism. Its inclusion as a core manipulation primitive is therefore essential for realistic adversarial evaluation and for the development of more robust intrusion detection systems.
+ that the model relies on for classification.
+
+\section{Single Flow Evolution Analysis}
+\label{sec:single_flow_analysis}
+
+To provide a concrete and interpretable view of how the proposed evasion framework alters traffic behavior, we analyze the evolution of a representative (``centroid'') flow across the three experimental phases: \texttt{Original}, \texttt{Manipulated}, and \texttt{Fragmented}.  
+Because fragmentation may split packets and the generation process can replicate or restructure flows, a strict one-to-one mapping of flow identifiers is not feasible. Instead, we compare statistically representative flows extracted from each phase, enabling a meaningful characterization of feature-level transformations.
+
+Table~\ref{tab:single_flow_evolution} reports the complete feature vector for the selected flows. The comparison offers a granular perspective on how statistical, structural, and temporal properties evolve under adversarial pressure.
+
+\begin{table}[H]
+\centering
+\caption{Complete Feature Vector Evolution for Representative Flows}
+\label{tab:single_flow_evolution}
+\begin{adjustbox}{width=0.8\textwidth, scale=0.9}
+\begin{tabular}{llcccc}
+\hline
+\textbf{ID} & \textbf{Feature Name} & \textbf{Original} & \textbf{Manipulated} & \textbf{Fragmented} \\ \hline
+0 & Flow Duration & 0.0417 & 0.0028 & 0.0055 \\
+1 & Fwd Pkt Len Mean & 0.0046 & 0.0011 & 0.0031 \\
+2 & Bwd Pkt Len Mean & 0.1200 & 0.0600 & 0.0400 \\
+3 & Tot Len Fwd Pkts & 0.0000 & 0.0000 & 0.0000 \\
+4 & Tot Len Bwd Pkts & 0.0000 & 0.0000 & 0.0000 \\
+5 & Tot Fwd Pkts & 0.0000 & 0.0000 & 0.0000 \\
+6 & Tot Bwd Pkts & 0.1413 & 0.1406 & 0.1417 \\
+7 & Flow Bytes/s & 0.0038 & 0.0004 & 0.0025 \\
+8 & Flow Pkts/s & 0.1200 & 0.1000 & 0.0600 \\
+9 & Flow IAT Std & 0.0000 & 0.0000 & 0.0000 \\
+10 & Flow IAT Max & 0.0000 & 0.0000 & 0.0000 \\
+11 & Fwd IAT Std & 0.0400 & 0.0000 & 0.0000 \\
+12 & Fwd IAT Max & 0.0400 & 0.0600 & 0.0200 \\
+13 & Bwd IAT Std & 0.0000 & 0.0000 & 0.0000 \\
+14 & Bwd IAT Max & 0.0000 & 0.0000 & 0.0000 \\
+15 & Flow IAT Mean & 0.0000 & 0.0000 & 0.0200 \\
+16 & Fwd IAT Mean & 0.0000 & 0.0000 & 0.0000 \\
+17 & Bwd IAT Mean & 0.0023 & 0.1509 & 0.1135 \\
+18 & Fwd Pkt Len Std & 0.0000 & 0.0000 & 0.0000 \\
+19 & Bwd Pkt Len Std & 0.0000 & 0.0000 & 0.0000 \\
+20 & Pkt Len Var & 0.1200 & 0.1000 & 0.0700 \\ \hline
+\end{tabular}
+\end{adjustbox}
+\vspace{0.1cm}
+{\small \\\textit{Note: Zero values indicate features that were originally absent or not activated for this specific attack flow.}}
+\end{table}
+
+\subsection{Observed Transformation Patterns}
+
+The feature evolution reveals three distinct categories of impact:
+
+\begin{itemize}
+    \item \textbf{Suppression Effects.}  
+    Certain timing features are explicitly neutralized. For example, \texttt{Fwd IAT Std} is reduced to zero after manipulation, removing variability cues that may signal bursty or anomalous behavior.
+
+    \item \textbf{Progressive Structural Degradation.}  
+    Key discriminative features exhibit stepwise reduction from Original to Manipulated to Fragmented phases. Notable examples include \texttt{Bwd Pkt Len Mean} and \texttt{Flow Pkts/s}. This gradual attenuation suggests deliberate weakening of statistical signatures commonly associated with high-intensity or amplification-based attacks.
+
+    \item \textbf{Adversarial Artifacts.}  
+    Some features increase rather than decrease. The most prominent case is \texttt{Bwd IAT Mean}, which rises sharply after manipulation. This reflects intentional injection of inter-packet delays, altering temporal spacing to avoid high-frequency detection rules.
+\end{itemize}
+
+The observed shifts are consistent with the design principles of the evasion framework and provide mechanistic validation of its operation:
+
+\begin{enumerate}
+    \item \textbf{Fragmentation-Induced Size Dilution.}  
+    The systematic reduction in packet length metrics (e.g., \texttt{Bwd Pkt Len Mean}: $0.120 \rightarrow 0.040$) confirms that fragmentation redistributes payload data across multiple smaller packets. This dilutes size-based signatures frequently exploited by NIDS for detecting amplification or data-exfiltration patterns.
+
+    \item \textbf{Rate-Based Camouflage.}  
+    High-rate flow characteristics are substantially attenuated.  
+    \texttt{Flow Duration} decreases by approximately $86\%$, while \texttt{Flow Pkts/s} drops by roughly $50\%$.  
+    Since many detection rules rely on sustained volumetric anomalies, this suppression effectively camouflages the attack within normal traffic variability.
+
+    \item \textbf{Temporal Reconfiguration.}  
+    The pronounced increase in \texttt{Bwd IAT Mean} indicates deliberate spacing of packets. A low inter-arrival time is typically indicative of rapid flooding behavior; increasing this value reduces temporal burstiness and weakens high-frequency attack signatures. Fragmentation further redistributes timing patterns, introducing additional irregularity that disrupts sequential modeling.
+\end{enumerate}
+
+\subsection{Implications}
+
+This single-flow analysis demonstrates that the evasion process does not merely induce statistical noise but systematically reshapes the defining characteristics of the attack signature. Structural (packet size), temporal (inter-arrival time), and rate-based (packets per second) attributes are jointly manipulated to weaken discriminative signals.
+
+Importantly, fragmentation amplifies these effects by targeting earlier stages of the traffic processing pipeline. By altering packet granularity and temporal continuity, it compounds the feature-level modifications introduced by the optimizer.
+
+Overall, the analysis confirms that the degradation observed at the model level is grounded in tangible and interpretable traffic transformations. The attack signature is not hidden through random perturbation, but through coordinated structural and temporal reconfiguration designed to exploit inherent assumptions in NIDS feature extraction and flow modeling.
+
+\section{Vulnerability Analysis: Feature Reset Test}
+
+To investigate the structural fragility observed under fragmentation, a progressive feature reset experiment was first conducted. In this setting, an increasing percentage of input features is set to zero at inference time while keeping the remaining features unchanged. This allows to evaluate how resilient the learned representation is to partial information loss.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.75\linewidth]{IMG/feature_reset_results.png}
+    \caption{Model performance under increasing percentages of feature reset for baseline, manipulated, and fragmented traffic.}
+    \label{fig:feature_reset_results}
+\end{figure}
+
+Figure~\ref{fig:feature_reset_results} reports the resulting performance trends in terms of absolute accuracy, accuracy degradation, and relative performance drop.
+
+Under baseline conditions, the model remains stable even when up to 50\% of features are reset. Significant degradation occurs only at extreme reset levels (75\%), suggesting that detection under clean traffic relies on a distributed and redundant set of features.
+
+In contrast, the fragmented scenario exhibits early and severe degradation. Even modest feature removal leads to substantial accuracy loss, and performance collapses rapidly as the reset percentage increases. The manipulated scenario lies between these two extremes.
+
+The relative degradation curves further confirm that fragmentation amplifies model sensitivity to feature perturbation, indicating reduced redundancy and increased dependency on a limited subset of discriminative statistics.
+
+\subsection{Single-Feature Dependency Analysis}
+
+To identify which specific features drive this vulnerability, each feature was individually reset while keeping all others unchanged. The resulting accuracy drops quantify the model’s reliance on individual variables.
+
+Table~\ref{tab:feature_importance} summarizes the most critical features under fragmented conditions.
+
+\begin{table}[h]
+\centering
+\caption{Top Critical Features for Fragmented Traffic Detection}
+\label{tab:feature_importance}
+\begin{tabular}{lc}
+\hline
+\textbf{Feature} & \textbf{Accuracy Drop when Reset} \\ \hline
+Flow IAT Mean (Feat 15) & -41.4\% \\
+Flow Duration (Feat 0)  & -12.3\% \\
+Fwd Pkt Len Mean (Feat 2) & -8.5\% \\ \hline
+\end{tabular}
+\end{table}
+
+Among all features, \texttt{Flow IAT Mean} emerges as the dominant dependency, causing a 41.4\% accuracy reduction when reset. This confirms that fragmentation primarily disrupts temporal flow regularity, concentrating discriminative power into timing-based statistics.
+
+The comparatively smaller impact of \texttt{Flow Duration} and \texttt{Fwd Pkt Len Mean} indicates that while volumetric and size-based features contribute to detection, they are secondary to inter-arrival timing under fragmented conditions.
+
+Overall, the combined analysis demonstrates that fragmentation induces a structural shift in feature reliance, reducing representational redundancy and increasing sensitivity to timing perturbations.
+\section{Strategic Insights}
+
+The combined experimental evidence provides several important insights into the security posture of ML-based NIDS:
+
+\begin{enumerate}
+    \item \textbf{Timing-Centric Vulnerability.}  
+    The strong dependence on inter-arrival time (IAT) statistics represents a structural weakness. Because these features can be modified without altering attack semantics, adversaries can manipulate packet timing, or exploit fragmentation, to reshape flow-level temporal patterns and evade detection.
+
+    \item \textbf{Processing-Stage Exploitation.}  
+    Fragmentation operates upstream of feature extraction, altering packet granularity before statistical aggregation occurs. This reveals a blind spot in pipelines that assume coherent, contiguous flows and do not explicitly account for fragment-aware reconstruction.
+
+    \item \textbf{Multi-Vector Synergy.}  
+    The combination of feature-space optimization (e.g., PSO-driven statistical adjustment) and structural manipulation (fragmentation) yields significantly stronger evasion than either technique independently. This demonstrates that layered adversarial strategies can exploit dependencies across multiple stages of the detection pipeline.
+
+    \item \textbf{Over-Reliance on Low-Dimensional Signals.}  
+    The disproportionate influence of a single timing feature suggests limited redundancy in the learned decision boundaries. When detection hinges on a narrow subset of correlated features, adversarial perturbation of those features can induce cascading failure.
+\end{enumerate}
+
+Overall, the Feature Reset analysis confirms that the effectiveness of fragmentation is not incidental but strategically aligned with the models’ learned dependencies. These findings highlight the necessity for next-generation NIDS architectures to (i) incorporate fragmentation-aware preprocessing, (ii) diversify feature representations beyond easily manipulable timing statistics, and (iii) adopt robustness-oriented training methodologies capable of resisting coordinated structural and temporal perturbations.
+
+\section{Overhead Analysis of the Extended Manipulator}
+\label{sec:overhead_analysis}
+
+The extended version of the \textit{Manipulator} introduces architectural improvements and optional IP fragmentation capabilities. While the core adversarial optimization mechanism remains unchanged, these additions introduce additional computational and traffic overhead. This section analyzes the overhead from three perspectives: computational cost, memory consumption, and network traffic expansion.
+
+\subsection{Computational Overhead}
+
+\subsubsection{PSO Optimization Cost}
+
+Both the original and extended implementations rely on Particle Swarm Optimization (PSO) for packet manipulation. The computational complexity of PSO per packet group is given by:
+
+\begin{equation}
+\mathcal{O}(\texttt{pso\_iter} \times \texttt{pso\_num} \times \texttt{grp\_size})
+\end{equation}
+
+Since the PSO configuration and execution logic remain unchanged, the base optimization cost is identical in both versions.
+
+\subsubsection{Feature Extraction Cost}
+
+After each optimization step, both implementations:
+\begin{itemize}
+    \item Reinitialize the feature extractor,
+    \item Copy the internal network statistics (\texttt{nstat}),
+    \item Recompute features using \texttt{RunFE()}.
+\end{itemize}
+
+Therefore, the feature extraction overhead remains equivalent. The extended version replaces deprecated timing functions with \texttt{time.perf\_counter()}, improving measurement precision without affecting computational complexity.
+
+\subsubsection{Fragmentation Processing Cost}
+
+When packet fragmentation is enabled, additional per-packet operations are introduced:
+\begin{itemize}
+    \item IP layer inspection,
+    \item Header length computation,
+    \item Payload size verification,
+    \item Probabilistic fragmentation decision.
+\end{itemize}
+
+These operations introduce a linear overhead:
+
+\begin{equation}
+\mathcal{O}(N)
+\end{equation}
+
+where $N$ denotes the number of processed packets.
+
+If fragmentation occurs, payload splitting and fragment construction further increase computational cost. Let $f$ denote the average number of fragments per fragmented packet and $N_f$ the number of fragmented packets. The resulting packet count becomes:
+
+\begin{equation}
+N' = N + (f - 1) \cdot N_f
+\end{equation}
+
+In the worst case, fragmentation introduces an additional complexity of:
+
+\begin{equation}
+\mathcal{O}(N \cdot f)
+\end{equation}
+
+However, since fragmentation is probabilistic and parameter-controlled, the practical overhead remains bounded.
+
+\subsection{Memory Overhead}
+
+\subsubsection{Statistics Storage}
+
+The original implementation stores statistics in global variables, whereas the extended version uses instance-level attributes. Although this improves modularity and safety, memory usage remains approximately identical.
+
+\subsubsection{Fragmentation-Induced Memory Growth}
+
+Fragmentation increases the total number of packet objects stored in memory. If the fragmentation ratio is denoted by $r$, memory usage scales approximately as:
+
+\begin{equation}
+\text{Memory}_{new} \approx (1 + r) \cdot \text{Memory}_{original}
+\end{equation}
+
+For example, if 30\% of packets are fragmented into three fragments on average, the total packet count increases by approximately 60\%, resulting in proportional memory growth.
+
+\subsection{Network Traffic Overhead}
+
+The most significant overhead arises from traffic expansion. Each fragment contains its own IP header, and possibly transport-layer headers, resulting in header duplication.
+
+Let $f$ denote the number of fragments generated per packet. The additional transmitted bytes per fragmented packet can be approximated as:
+
+\begin{equation}
+\text{Extra Bytes} \approx (f - 1) \times \text{Header Size}
+\end{equation}
+
+Consequently, total bandwidth consumption increases with fragmentation intensity. While this may improve evasion effectiveness, it also increases detectability risk and processing cost for intrusion detection systems.
+
+\subsection{Summary of Overhead Impact}
+
+Table~\ref{tab:overhead_summary} summarizes the comparative overhead characteristics.
+
+\begin{table}[h]
+\centering
+\caption{Overhead comparison between original and extended versions}
+\label{tab:overhead_summary}
+\begin{tabular}{lccc}
+\hline
+Component & Original & Extended (No Frag.) & Extended (Frag.) \\
+\hline
+PSO Cost & Same & Same & Same \\
+Feature Extraction & Same & Same & Same \\
+Packet Inspection & Minimal & Minimal & +$\mathcal{O}(N)$ \\
+Packet Creation & Baseline & Baseline & +$\mathcal{O}(N \cdot f)$ \\
+Memory Usage & Baseline & Same & Increased \\
+PCAP Size & Baseline & Same & Increased \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Conclusion}
+
+The architectural refactoring of the \textit{Manipulator} introduces negligible computational overhead when fragmentation is disabled. The primary additional cost stems from optional packet fragmentation, which increases computational complexity linearly, expands memory usage proportionally to the fragmentation ratio, and increases network traffic volume due to header duplication.
+
+Importantly, the overhead is controllable through configurable fragmentation parameters, allowing a trade-off between adversarial effectiveness and resource consumption.

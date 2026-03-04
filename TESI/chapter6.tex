@@ -1,0 +1,141 @@
+\chapter{Applications of AEGIS}
+\label{cha:applications}
+
+In the remainder of this thesis, the proposed system is referred to as \textbf{AEGIS} (Adversarial Evaluation and Generation framework for Intrusion detection Systems), a unified framework integrating the Traffic Manipulator~\cite{han2021evaluating} and the FRANTIC fragmentation module into a comprehensive robustness assessment and adversarial training pipeline.
+
+By combining feature-level optimization with controlled structural perturbations, AEGIS generates realistic adversarial traffic that preserves protocol semantics while systematically targeting statistical and architectural vulnerabilities in ML-based NIDS. As such, it constitutes a versatile tool for both offensive and defensive security research.
+\\\\
+The framework supports four primary application domains:
+\begin{enumerate}
+    \item Dataset Augmentation
+    \item Penetration Testing and Red Teaming
+    \item NIDS Robustness Evaluation
+    \item Adversarial Training and Robust Model Development
+\end{enumerate}
+
+\section{Dataset Augmentation and Penetration Testing}
+
+One of the primary challenges in training robust ML-based NIDS is the limited availability of diverse and adversarially informed malicious traffic. Although ML-based NIDS frequently report near-perfect benchmark performance, a growing body of literature highlights systemic weaknesses that undermine their real-world reliability.
+
+Several studies emphasize the over-reliance on outdated or static benchmark datasets. For instance, \cite{he2023adversarial} note that outdated datasets may fail to capture representative modern network patterns. Similarly, \cite{ahmed2025network} argue that heavy dependence on legacy benchmarks significantly reduces relevance to sophisticated threats.
+
+Static datasets also fail to reflect evolving adversarial behavior. As observed in \cite{roshan2024boosting}, static test corpora do not adequately represent the dynamic nature of adversarial tactics. Moreover, many publicly available datasets lack realistic traffic diversity and concept-drift evaluation capability \cite{alotaibi2023adversarial}.
+
+AEGIS addresses this limitation by serving as a high-fidelity generator of synthetic adversarial traffic. As illustrated by the data presented in the confusion matrix (Figure~\ref{fig:confusion_matrix}), the progressive increase in sample counts across augmentation stages confirms the effective expansion of the training dataset achieved.
+
+Through its GAN-PSO optimization pipeline, AEGIS actively explores the decision boundary of the target NIDS, generating polymorphic variants of known attacks that retain malicious intent while exhibiting altered statistical properties.
+
+Injecting these adversarially optimized samples into training datasets expands feature space coverage, particularly in underrepresented regions. This reduces reliance on fragile statistical shortcuts and promotes more invariant representations.
+
+
+The FRANTIC module further enhances diversity by introducing controlled packet fragmentation. By varying parameters such as \texttt{fragment\_probability} and fragment size, AEGIS produces a continuum of structurally perturbed traffic instances.
+
+The discrepancy between laboratory evaluation and real-world deployment has been widely acknowledged. Public datasets, while useful for benchmarking, are often unsuitable for deployable systems \cite{neupane2022explainable}. The gap between academic experimentation and operational practicality remains significant.
+
+As demonstrated in Chapter~\ref{cha:evaluation}, models trained solely with the original public dataset(CIC-IDS2019) exhibit severe degradation under such conditions. The inclusion of fragmented samples is therefore essential for realistic robustness assessment.
+
+AEGIS serves as a practical tool for systematic adversarial testing of deployed NIDS.
+Unlike traditional traffic replay or fuzzing approaches, it preserves protocol compliance and attack semantics and manipulates statistical flow features.
+
+This enables security analysts to probe model-specific weaknesses, including timing dependencies and fragmentation blind spots.
+Organizations can employ AEGIS as a red-teaming instrument to evaluate detection resilience before real adversaries exploit these vulnerabilities.
+
+\section{NIDS Robustness Evaluation}
+
+A major limitation of standard benchmarking practices is the reliance on static datasets that do not incorporate adaptive adversarial behavior.
+
+Fragmentation-based evasion has been documented extensively in prior literature. Attackers have successfully split malicious payloads across multiple packets to hinder signature reconstruction and evade detection \cite{md2025guardians}. Earlier work demonstrated that inconsistencies in fragment reassembly policies between sensors and hosts enable evasion through overlapping or reordered fragments \cite{corona2013adversarial}.
+
+Flow-based NIDS introduce additional constraints. As discussed in \cite{10005100}, flow-level features often require connection termination before computation, limiting real-time detection and increasing vulnerability to structurally manipulated traffic.
+
+These documented weaknesses motivate the design of AEGIS as a systematic robustness evaluation framework rather than a purely generative adversarial tool.
+
+To emphasize the general applicability of AEGIS, a consolidated representation of the previously discussed experiments is presented across multiple NIDS architectures.
+
+Figure~\ref{fig:cross_model_degradation} summarizes the performance degradation observed when models trained on baseline traffic are evaluated on manipulated and fragmentation-enhanced traffic generated by AEGIS.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth]{IMG/Degradation.png}
+    \caption{Performance degradation across multiple NIDS architectures under baseline, manipulated, and fragmented traffic conditions generated by AEGIS.}
+    \label{fig:cross_model_degradation}
+\end{figure}
+
+Under baseline conditions, all models achieve near-perfect F1 scores (above 0.97). However, when evaluated against fragmented traffic, performance collapses dramatically. For example:
+
+\begin{itemize}
+    \item MLP F1 decreases from 0.9987 to 0.1826,
+    \item RF F1 decreases from 0.9999 to 0.0306,
+    \item LUCID F1 decreases from 0.9757 to 0.1695.
+\end{itemize}
+
+Correspondingly, FNR increases to values exceeding 0.89 across architectures.
+
+These results demonstrate that fragmentation-based structural obfuscation represents a general vulnerability rather than a model-specific weakness.
+
+\section{Adversarial Training}
+Beyond vulnerability discovery, AEGIS enables defensive hardening through adversarial training.
+However, adversarial training offers a promising defensive strategy but introduces non-trivial trade-offs.
+
+Indeed, it does not impose any inference-time overhead, unlike detection-based methods. However, it often results in suboptimal clean-data performance, leading to the trade-off between robustness and accuracy. This is caused by shifts in the decision boundaries of the models due to min-max optimization.
+
+Robust training may also require substantially increased model capacity and significantly more training data. Empirical evidence shows that modest robustness improvements can demand hundreds of thousands of additional samples.
+
+Furthermore, robustness gains may be uneven across classes, leading to class-wise robustness imbalance and potential blind spots.
+
+\subsubsection*{Transferability Considerations}
+
+Transfer-based attacks leverage the phenomenon whereby adversarial examples crafted for one model remain effective against another \cite{he2023adversarial}. However, transferability in network security contexts is less consistent than in vision domains. Architectural variance and feature constraints reduce cross-model generalization of adversarial samples.
+
+These findings justify AEGIS’s surrogate-based optimization approach while acknowledging inherent uncertainty.
+
+\subsubsection*{Surrogate Model Limitations}
+
+The effectiveness of surrogate-based optimization depends on accurate approximation of the target model’s decision boundary. Surrogate models may fail to capture complex boundary geometry, reducing transfer success \cite{ennaji2025adversarial}.
+
+Searching for evasion points that are only marginally misclassified by the surrogate may rarely evade the true classifier \cite{zhang2015adversarial}. Additionally, unrealistic assumptions about attacker data access undermine practical applicability in some prior work \cite{vitorino2023sok}.
+
+AEGIS mitigates these issues by constraining perturbations to realistic feature manipulations and protocol-compliant structural transformations.
+
+\subsection{Training Strategy Comparison}
+
+To evaluate this capability, the MLP model was trained under three regimes:
+
+\begin{enumerate}
+    \item OG: Original dataset only,
+    \item MANIPULATED: Dataset augmented using the Traffic Manipulator,
+    \item ADV: Dataset augmented using the full AEGIS pipeline.
+\end{enumerate}
+
+Figure~\ref{fig:adv_training_comparison} reports the resulting performance across baseline, manipulated, and fragmented test conditions.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\linewidth]{IMG/ADV_TRAINING_COMPARISON.png}
+\caption{Model performance under different training strategies: original training (OG), feature-level augmentation (MANIPULATED), and full AEGIS adversarial training (ADV).}
+\label{fig:adv_training_comparison}
+\end{figure}
+
+Training exclusively on clean data leads to catastrophic failure under fragmentation (FNR = 0.8922).  
+In contrast, adversarial training significantly reduces FNR under evasion scenarios while maintaining competitive baseline performance.
+
+These findings confirm that AEGIS functions not only as an attack generator but also as a robustness enhancement mechanism.
+
+Moreover, the configurable nature of AEGIS enables staged training strategies in which perturbation intensity is progressively increased. Such approach may further mitigate the typical robustness–accuracy trade-off observed in adversarial training.
+\\\\
+\section{Limitations}
+
+Despite its capabilities, the improved manipulator has several limitations that warrant discussion.
+
+\subsection*{Protocol Implementation Constraints}
+
+The current fragmentation implementation relies on standard IP header manipulation and remains compliant with relevant RFCs. However, it does not fully emulate complex fragmentation-based exploits such as \textit{Teardrop} attacks or OS-specific overlapping fragment strategies. Additionally, aggressive perturbations of stateful protocols (e.g., TCP handshake manipulation) may inadvertently invalidate connections, leading to traffic that is evasive due to non-functionality rather than true adversarial behavior.
+
+\subsection*{Dependency on Surrogate Models}
+
+The effectiveness of the GAN-PSO adversarial search depends on the fidelity of the surrogate model used during optimization. If the target NIDS employs substantially different features or architectures, attack transferability may be reduced, limiting the effectiveness of generated adversarial samples.
+
+\subsection*{Real-Time Generation Latency}
+
+The iterative nature of PSO introduces non-negligible computational overhead, making the framework more suitable for offline dataset generation and evaluation than for real-time deployment as an evasion proxy. Fragmentation itself is computationally lightweight and can be applied near real-time; however, the full adversarial optimization pipeline is not designed for high-throughput live attack scenarios.
+

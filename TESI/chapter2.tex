@@ -1,0 +1,755 @@
+\chapter{Background}
+\label{cha:background}
+\section{Network Intrusion Detection Systems}
+Network Intrusion Detection Systems (NIDS) are a fundamental component of modern cybersecurity infrastructures, designed to monitor and analyze network traffic in real time to identify malicious activities, anomalous behaviors, or policy violations. Positioned at strategic points within a network, NIDS provide a global view of all incoming and outgoing communications, enabling the detection of threats that may compromise the confidentiality, integrity, and availability (CIA) of systems and data \cite{abou2020investigating, ibitoye2025threat}. Unlike Host-based Intrusion Detection Systems (HIDS), which monitor individual endpoints, NIDS operate at the network level, offering centralized visibility across multiple devices and communication flows \cite{madani2018robustness}.
+
+The primary role of a NIDS is to transform raw network traffic into actionable security intelligence by generating alerts, logs, and forensic data that can be further analyzed by security operators or automated response mechanisms. As network environments grow in scale and complexity, NIDS are increasingly integrated with emerging paradigms such as Software-Defined Networking (SDN) and cloud-native security architectures, where centralized control planes facilitate network-wide monitoring and policy enforcement \cite{ayub2020model, dhadhania2024unleashing}.
+
+From an architectural perspective, a standard NIDS is typically composed of four core functional components: (i) \textit{event generators}, responsible for collecting raw traffic data; (ii) \textit{event analyzers}, which process and analyze this data to identify potential intrusions; (iii) \textit{response units}, which execute predefined or adaptive countermeasures; and (iv) \textit{event databases}, which store historical data for auditing, forensic analysis, and trend discovery \cite{corona2013adversarial}. These components collectively form a detection pipeline that converts high-volume packet streams into structured representations suitable for automated analysis.
+
+\subsubsection{Detection Pipeline and Operational Framework}
+
+To operationalize detection, NIDS process network telemetry through a structured pipeline that typically consists of monitoring, feature extraction, classification, and response stages \cite{vitorino2023sok}. During the monitoring phase, raw packet streams are captured from network interfaces, often amounting to massive volumes of data. To enable efficient analysis, packets are aggregated into higher-level abstractions, commonly referred to as \emph{flows}, defined by shared properties such as source and destination IP addresses, ports, and protocol identifiers \cite{he2023adversarial, hartl2020explainability}.
+
+Detection mechanisms employed by NIDS are traditionally categorized into two principal paradigms: signature-based detection and anomaly-based detection \cite{alotaibi2023adversarial}.
+
+Feature extraction represents a critical and irreversible transformation in the NIDS pipeline, converting raw traffic into numerical feature vectors suitable for machine learning models. Depending on the system design, features may be extracted at different granularities \cite{han2021evaluating, hartl2020explainability}. 
+
+Packet-based NIDS operate on individual packets, capturing attributes such as frame length, TCP flags, and inter-arrival times. Flow-based NIDS compute statistical aggregates over entire connections, including metrics such as packet counts, byte volumes, and average transmission rates, yielding more stable behavioral representations. More advanced approaches further aggregate multiple flows into communication channels to capture long-term behavioral intent between endpoints \cite{hashemi2020enhancing, vitorino2023sok, cui2023cbseq}.
+
+Before classification, extracted features typically undergo preprocessing steps such as normalization, encoding, and feature reduction to improve computational efficiency and detection accuracy. Techniques such as min--max scaling, one-hot encoding, and dimensionality reduction methods (e.g., Principal Component Analysis or Genetic Algorithms) are commonly employed to eliminate redundant or irrelevant attributes \cite{doriguzzi2020lucid, alasad2026comprehensive}.
+
+Modern NIDS increasingly rely on machine learning (ML) and deep learning (DL) models as inference engines to handle high-dimensional traffic data and complex attack patterns. Architectures such as Multilayer Perceptrons (MLP), Convolutional Neural Networks (CNN), Recurrent Neural Networks (RNN), and Long Short-Term Memory (LSTM) networks are used to capture spatial and temporal dependencies in network traffic \cite{he2023adversarial, zhang2022adversarial}. Unsupervised models, including deep autoencoders, perform anomaly detection by computing reconstruction errors, with traffic exceeding predefined thresholds classified as malicious \cite{sarikaya2023raids}.
+
+Following classification, the response phase determines appropriate mitigation actions, ranging from passive alerting and logging to active intervention through Intrusion Prevention Systems (IPS). Automated responses may include blocking malicious IP addresses, terminating suspicious connections, or redirecting traffic to honeypots \cite{corona2013adversarial, bountakas2023defense}. Recent research further emphasizes explainable NIDS (X-IDS), which incorporate human-in-the-loop mechanisms and interpretability techniques such as SHAP and LIME to translate model outputs into actionable insights for security analysts \cite{neupane2022explainable}.
+
+\subsection{Network Traffic Features and Representation}
+
+The representation of network traffic constitutes a fundamental abstraction step in the design of NIDS, necessitated by the immense volume and unstructured nature of raw packet telemetry, which can reach terabytes per day in operational networks. To enable effective analysis, raw packet streams must be transformed into structured feature representations suitable for ML and DL models, a process that is inherently irreversible and non-differentiable \cite{10005100, he2023adversarial}. The effectiveness of a NIDS is therefore tightly coupled to the choice of traffic features, which must capture both static protocol semantics and dynamic temporal behaviors while preserving the syntactic validity of network communication \cite{zhang2022adversarial}.
+
+\subsubsection{Granularity of Traffic Representation}
+
+Network traffic representation is commonly classified according to its level of granularity, ranging from packet-level analysis to flow-level and higher-order aggregated abstractions \cite{hashemi2020enhancing, he2023adversarial}.
+
+Packet-level representation analyzes individual packets upon arrival, providing fine-grained visibility into real-time network states. Features at this level are typically extracted from packet headers and include attributes such as packet length, header sizes, time-to-live (TTL), transport-layer flags, sequence numbers, and immediate timestamps \cite{hashemi2020enhancing}. Some packet-based NIDS further employ sliding temporal windows that group a fixed number of consecutive packets to provide short-term contextual snapshots of traffic behavior. While packet-level analysis enables rapid anomaly detection, the sheer volume of packets often limits the feasibility of supervised learning and motivates the use of unsupervised or outlier-based detection approaches \cite{he2023adversarial}.
+
+Flow-level representation constitutes the most widely adopted paradigm in contemporary NIDS. In this setting, packets are aggregated into bidirectional flows defined by a common 5-tuple consisting of source and destination IP addresses, source and destination ports, and the transport protocol \cite{hartl2020explainability}. Flow-based features reduce noise and heterogeneity by summarizing communication behavior over time, enabling the extraction of stable statistical patterns that are more amenable to classification. To support online detection, flows are frequently segmented into time-based sub-flows, allowing malicious activity to be identified before connection termination \cite{doriguzzi2020lucid}. This representation also facilitates spatial encodings, such as flow matrices, which are particularly suitable for convolutional neural networks (CNNs) that learn localized feature interactions.
+
+Beyond individual flows, higher-order aggregation strategies have been proposed to capture broader behavioral contexts. Channel-level representations, for example, aggregate all multi-flow traffic exchanged between a given source and destination IP pair \cite{cui2023cbseq}. Such abstractions are effective in detecting distributed or low-and-slow attacks, command-and-control (C\&C) communications, and transient multi-node behaviors that may appear benign when individual flows are analyzed in isolation \cite{zhao2025unified}.
+
+\subsubsection{Taxonomy of Network Traffic Features}
+
+Features extracted for NIDS analysis are commonly organized into three complementary dimensions: temporal, statistical (spatial), and protocol-based features \cite{han2021evaluating}.
+
+Temporal features characterize the timing dynamics of network communication and are critical for detecting repetition-based and rate-based attacks, such as Distributed Denial of Service (DDoS). Typical temporal metrics include inter-arrival times (IAT) between packets or flows, flow duration, jitter, and burstiness statistics \cite{doriguzzi2020lucid, he2023adversarial}. These features are particularly sensitive to both benign network variability and intentional obfuscation, as attackers may reshape traffic timing to evade detection without altering payload content \cite{han2021evaluating}.
+
+Statistical features provide quantitative summaries of traffic volume and distribution, capturing the intensity and structure of communication. Common examples include total bytes and packets transmitted, packets per second, mean and variance of packet sizes, and ratios between forward and backward traffic \cite{hashemi2020enhancing}. Entropy-based features are also employed to detect sudden changes in the randomness of header fields, such as destination IP distributions, which often accompany volumetric or scanning attacks \cite{doriguzzi2020lucid}. Feature selection studies have identified attributes such as \textit{Fwd IAT Total} and \textit{Bwd Packet Length Min} as highly discriminative for DDoS classification \cite{mccarthy2021feature}.
+
+Protocol-based features capture the functional semantics of network communication across the TCP/IP stack. These include TCP flag statistics (e.g., SYN, ACK, FIN, RST), window size dynamics, sequence number behavior, and fragmentation indicators \cite{wang2024progen, hartl2020explainability}. In encrypted environments where payload inspection is infeasible, NIDS increasingly rely on protocol metadata, such as TLS handshake attributes, cipher suite lists, protocol versions, and certificate properties, to infer malicious intent \cite{cui2023cbseq}. Preserving semantic and syntactic validity in these features is essential, as arbitrary perturbations may violate protocol constraints and render traffic invalid or easily detectable \cite{vitorino2023sok}.
+
+\subsubsection{Structural and Graph-Based Representations}
+
+Recent NIDS frameworks have moved beyond traditional tabular feature representations toward structural and graph-based abstractions. Graph Neural Network (GNN)-based NIDS model network entities and their interactions as graphs, where nodes represent hosts, flows, or protocol states, and edges encode communication relationships \cite{sun2024gnn, esmaeili2023gnn}. In such systems, static network attributes, such as known vulnerabilities encoded in attack graphs, are combined with dynamic traffic measurements to identify the specific malicious actions responsible for observed anomalies.
+
+Graph-based representations have also demonstrated robustness against certain obfuscation techniques. For instance, in IoT malware detection, executables may be represented as Control Flow Graphs (CFGs), where nodes correspond to basic blocks and edges represent execution paths, allowing the model to learn structural properties that persist despite syntactic transformations \cite{esmaeili2023gnn}. Feature learning in these settings often exploits node-level metrics, such as degree centrality or connectivity patterns, to capture interdependencies that are difficult to obscure through simple traffic manipulation \cite{sun2024gnn}.
+
+\subsection{Signature-Based NIDS}
+
+Signature-based NIDS constitute one of the earliest and most widely deployed paradigms for network threat detection. These systems identify malicious activity by performing deterministic pattern-matching operations between observed network traffic and a predefined repository of known threat signatures \cite{sun2024gnn, ahmed2025signature}. The primary objective of signature-based intrusion detection systems (SIDS) is to safeguard the CIA of networked systems by generating alerts whenever traffic exhibits characteristics associated with previously documented attacks.
+
+In this context, a \emph{signature} is typically defined as a unique sequence of bytes, protocol fields, or traffic attributes that unambiguously characterize a specific malicious behavior. Signatures are derived from indicators of compromise extracted during the analysis of known attacks and are subsequently encoded into detection rules or heuristics \cite{10005100, yuan2024simple}. During the measurement phase, the system inspects packet payloads and headers, extracting relevant byte patterns or attributes that are formalized into signatures used for classification. The creation of these signatures often relies on expert knowledge and manual rule engineering performed by security analysts. Widely adopted open-source SIDS platforms, such as Snort and Suricata, maintain extensive and continuously updated rule sets to detect a broad spectrum of attacks, including port scanning, buffer overflows, and denial-of-service (DoS) activities \cite{ahmed2025signature, cui2023cbseq}.
+
+The operational core of SIDS consists of a classification phase in which extracted traffic patterns are compared against a signature database using string-matching or rule-evaluation algorithms. Alerts are triggered only when traffic satisfies rigid conditions explicitly defined within the rule set, resulting in highly deterministic detection behavior \cite{shaukat2022novel, alotaibi2023adversarial}. However, maintaining the effectiveness of SIDS requires continuous manual updates, as new signatures must be generated and distributed for each newly discovered attack. Even minor modifications to malware code or changes in transport protocols can invalidate existing signatures, rendering them ineffective until updated rules are deployed \cite{ahmed2025network}.
+
+A major strength of SIDS lies in their high precision and extremely low false-positive rates when detecting known attacks. This reliability makes SIDS particularly attractive in operational environments where false alarms are costly or disruptive \cite{ahmed2025signature}. 
+
+\subsubsection{Limitations and Evasion Strategies}
+
+Despite their strengths, signature-based NIDS suffer from fundamental limitations due to their reliance on static pattern-matching logic. Most notably, they are inherently incapable of detecting zero-day attacks or previously unseen threats for which no signature exists. Additionally, the increasing prevalence of encrypted network traffic significantly limits the effectiveness of SIDS, as encrypted payloads appear as random ciphertext, preventing the extraction of meaningful semantic signatures. The manual effort required to continuously derive and deploy new signatures further constrains their scalability in dynamic threat environments \cite{hashemi2020enhancing, cui2023cbseq, doriguzzi2020lucid}.
+
+Adversaries exploit these limitations through a variety of evasion techniques. Common strategies include byte-level obfuscation and character substitution, which alter payload representations without affecting malicious intent, thereby bypassing exact signature matches. Encryption and tunneling mechanisms, such as TLS-based encapsulation, conceal malicious content from inspection engines, rendering signature databases ineffective \cite{khorshidpour2018domain, vitorino2023sok}. 
+
+Packet fragmentation represents another powerful evasion strategy, whereby malicious payloads are divided across multiple packets that may be processed independently by the SIDS, preventing the reconstruction of a coherent signature. More advanced techniques include polymorphic and metamorphic malware, which dynamically modify code structure across executions, as well as adversarial manipulation strategies that deliberately exploit known detection rules to evade classification \cite{wang2023evasion, alasad2026comprehensive}. Collectively, these evasion methods highlight the intrinsic fragility of signature-based detection in adversarial settings.
+
+\subsection{Anomaly-Based and Machine-Learning NIDS}
+
+Anomaly-based NIDS represent a paradigm shift from deterministic signature matching toward behavioral modeling, where malicious activity is identified by measuring deviations from an established profile of normal network behavior \cite{ayub2020model}. Unlike signature-based systems, which rely on predefined knowledge of known exploits, anomaly-based approaches are inherently capable of detecting previously unseen or zero-day attacks by identifying statistically or semantically abnormal traffic patterns \cite{he2023adversarial}. This capability has driven a widespread transition toward ML and DL techniques, which can automatically extract meaningful representations from the high-dimensional and high-volume traffic characteristic of modern networks \cite{sun2024gnn}.
+
+Contemporary anomaly-based NIDS (A-NIDS) typically operate under a semi-supervised or unsupervised learning paradigm, often referred to as a "zero-positive" setting, in which models are trained exclusively on benign traffic to capture the distribution of legitimate network behavior. Raw packets are first transformed into structured feature vectors through a feature extraction process that emphasizes statistical and protocol-level attributes, such as packet sizes, inter-arrival times, flow durations, and TCP flags, particularly to accommodate encrypted traffic where payload inspection is infeasible \cite{han2021deepaid, he2023adversarial}. The learned representation serves as a baseline against which future observations are evaluated.
+
+Deep Learning architectures, including Deep Neural Networks (DNNs), Recurrent Neural Networks (RNNs), and Graph Neural Networks (GNNs), further enhance detection capabilities by autonomously discovering hierarchical and temporal relationships within traffic without requiring expert-driven feature design \cite{zhao2025unified}.
+
+Several detection strategies are employed depending on the model architecture:
+\begin{itemize}
+\item \textbf{Reconstruction-based Detection}: Autoencoders (AEs) learn a compressed latent representation of benign traffic through an encoding–decoding process. Malicious traffic, being poorly represented by the learned benign manifold, results in high reconstruction error, which is used as an anomaly score \cite{sarikaya2023raids}.
+\item \textbf{Prediction-based Detection}: Sequence models such as Long Short-Term Memory (LSTM) networks predict future packets or events based on historical context. Deviations are detected when observed traffic exhibits low likelihood under the predicted distribution \cite{he2023adversarial}.
+\item \textbf{Graph-based Analysis}: Emerging approaches model hosts and flows as graphs, identifying anomalies through structural or topological deviations from learned benign communication patterns \cite{zhao2025unified}.
+\end{itemize}
+
+\subsubsection{Limitations}
+\paragraph{Decision Thresholds and False Positives}
+Anomaly detection decisions are made by comparing an anomaly score to a predefined threshold, often derived using statistical decision theory such as the Neyman–Pearson framework \cite{brauckhoff2009applying}. This introduces an inherent trade-off: higher thresholds reduce false positives but increase false negatives, while lower thresholds improve sensitivity at the cost of excessive alarms. High false-positive rates remain a central limitation of A-NIDS, as legitimate but rare behaviors may be incorrectly flagged as malicious \cite{madani2018robustness}. This issue is exacerbated by the intrinsic complexity of network traffic distributions, which makes learning an accurate and stable decision boundary exceedingly difficult \cite{bao2018mitigating}.
+
+\paragraph{Concept Drift and Adaptability}
+Network traffic is fundamentally non-stationary, exhibiting periodic patterns and long-term behavioral shifts driven by evolving applications and user activity \cite{madani2018robustness}. To remain effective, A-NIDS must adapt to this phenomenon, known as concept drift, through periodic retraining or online learning mechanisms \cite{vitorino2023sok}. While adaptability improves long-term detection performance, it also introduces a critical vulnerability to adversarial manipulation.
+
+The adaptive nature of ML-based A-NIDS exposes them to causative or poisoning attacks, in which adversaries deliberately contaminate the training data to corrupt the learned notion of normality. A notable example is the “Boiling Frog” attack, where small amounts of malicious traffic are gradually injected over extended periods, slowly shifting the decision boundary until large-scale attacks are misclassified as benign \cite{rubinstein2009antidote}. This susceptibility underscores a central research challenge: while A-NIDS excel at detecting unknown threats, their real-world deployment critically depends on robustness against adversarial evasion and manipulation \cite{apruzzese2024adversarial}.
+
+\subsection{Machine Learning versus Deep Learning in NIDS}
+
+The evolution of NIDS has been characterized by a progressive shift from traditional, shallow ML paradigms toward more expressive DL architectures. Conventional ML-based NIDS commonly rely on algorithms such as Support Vector Machines (SVM), Decision Trees (DT), Random Forests (RF), Naive Bayes (NB), and K-Nearest Neighbors (KNN) to classify network traffic into benign or malicious categories \cite{ahmed2025network, ayub2020model}. In contrast, DL-based NIDS employ multi-layer neural architectures, including Multilayer Perceptrons (MLP), Convolutional Neural Networks (CNN), Recurrent Neural Networks (RNN), Long Short-Term Memory (LSTM) networks, and more recently Graph Neural Networks (GNN), to model complex, non-linear network behaviors at scale \cite{alasad2026comprehensive}.
+
+\subsubsection{Feature Engineering and Data Representation}
+
+A fundamental distinction between ML- and DL-based NIDS lies in their approach to feature engineering and data representation. Traditional ML models are heavily dependent on expert-driven feature extraction and selection processes, requiring domain knowledge to manually craft, rank, and reduce features derived from raw traffic. Common techniques include statistical ranking methods such as Information Gain, Chi-Squared tests, Recursive Feature Elimination, and dimensionality reduction approaches like Principal Component Analysis \cite{neupane2022explainable, hartl2020explainability, vitorino2025reliable}. While effective in controlled settings, this manual process is labor-intensive and susceptible to cognitive bias, potentially overlooking subtle yet discriminative traffic patterns \cite{ennaji2025adversarial}.
+
+Deep learning models mitigate this dependency through representation learning, autonomously extracting hierarchical and non-linear features directly from packet sequences or aggregated traffic statistics. This capability enables DL-based NIDS to capture intricate temporal, spatial, and relational patterns within large-scale network data that may be difficult to encode manually \cite{doriguzzi2020lucid, abou2020investigating}. However, this autonomy can also result in the learning of spurious correlations or the neglect of structured domain constraints, which may negatively impact robustness and generalization \cite{guo2025knowml}.
+
+\subsubsection{Model Complexity and Computational Requirements}
+
+From a computational perspective, traditional ML models are characterized by relatively simple structures and a limited number of learnable parameters. This simplicity translates into low training overhead, fast inference times, and suitability for deployment in resource-constrained environments such as edge devices and Internet-of-Things (IoT) networks \cite{md2025guardians}. Their performance is primarily governed by the quality of the engineered feature set rather than model depth.
+
+Conversely, DL-based NIDS consist of deep, nested non-linear architectures with a large number of trainable weights and biases. While this complexity allows DL models to achieve state-of-the-art detection accuracy on high-dimensional and large-scale datasets, it imposes high computational costs, often requiring specialized hardware such as GPUs or TPUs and extended training times \cite{doriguzzi2020lucid, abou2020investigating}. These requirements may limit their practicality in latency-sensitive or resource-limited operational settings.
+
+\subsubsection{Interpretability and Trustworthiness}
+
+Interpretability is a critical requirement for operational NIDS, as security analysts must understand and trust automated decisions. 
+Traditional ML-based NIDS offer a clear advantage in this regard, as many of their models, such as decision trees and rule-based classifiers, are inherently interpretable and function as "white-box" systems \cite{neupane2022explainable}. 
+Such transparency enables Cyber Security Operation Center (CSoC) analysts to trace detection decisions back to specific traffic attributes, facilitating troubleshooting and informed response actions \cite{vitorino2025reliable}.
+
+In contrast, DL models are often regarded as "black boxes" due to the opacity of their internal decision-making processes \cite{zhang2022adversarial}. 
+The difficulty of mapping outputs back to meaningful input features creates a semantic gap between detection scores and actionable insights, potentially undermining operator trust \cite{wei2023xnids}. 
+Although post-hoc explainability techniques, such as SHAP, activation analysis, or GNN-based explanations, have been proposed, they remain approximations and do not fully resolve the inherent lack of transparency of deep models \cite{sun2024gnn}.
+
+\subsubsection{Robustness and Adversarial Vulnerability}
+
+Robustness represents a pervasive challenge for both ML- and DL-based NIDS, albeit in different forms \cite{he2023adversarial}. 
+Traditional ML models often struggle to generalize to previously unseen or zero-day attacks, as they rely on static feature distributions derived from historical data \cite{yang2025self}. 
+However, their simpler decision boundaries and lower model capacity can confer a degree of resistance to certain adversarial perturbations, particularly when attacks fail to transfer across model classes \cite{yuan2024simple}.
+
+Deep learning models exhibit stronger generalization capabilities but be highly vulnerable to adversarial evasion attacks \cite{zhang2022adversarial}. 
+Carefully crafted, human-imperceptible perturbations, such as subtle modifications to packet sizes, timing information, or flow statistics, can cause DL-based NIDS to misclassify malicious traffic as benign with high confidence \cite{sauka2022adversarial}. 
+Moreover, both white-box and black-box decision-based attacks have demonstrated effectiveness across a wide range of learning-based detectors, indicating that high detection accuracy does not necessarily imply adversarial robustness \cite{sharma2024systematic}.
+
+\section{Adversarial Machine Learning in Cybersecurity}
+
+The increasing adoption of ML and DL techniques in cybersecurity has significantly enhanced the detection capabilities of NIDS. However, this progress has also exposed such systems to a new class of threats collectively referred to as \emph{Adversarial Machine Learning} (AML). AML studies how intelligent adversaries can intentionally manipulate data or learning processes to subvert the behavior of machine learning models, causing misclassification, degradation of performance, or leakage of sensitive information \cite{huang2011adversarial}. 
+
+Unlike traditional threat models, which assume stationary data distributions and passive adversaries, AML explicitly considers attackers who actively probe, manipulate, and adapt to the deployed detection mechanisms \cite{khorshidpour2018domain}. These adversaries may operate under varying degrees of knowledge and capability, targeting different stages of the machine learning pipeline, from training to inference.
+
+\subsection{Threat Models}
+
+The definition of threat models in AML for NIDS requires a multidimensional characterization of an adversary's knowledge, capabilities, and strategic objectives. Unlike traditional security assumptions that treat attackers as passive or statistically independent from the defense mechanism, AML explicitly considers adaptive adversaries who actively manipulate inputs to induce classification errors. As a result, threat modeling becomes a fundamental prerequisite for evaluating the robustness of ML-based NIDS and for designing realistic adversarial defenses.
+
+\subsubsection{Attacker Knowledge Assumptions}
+
+The amount of information available to the attacker about the target NIDS strongly influences the effectiveness of an adversarial attack. 
+Accordingly, adversarial settings are commonly categorized into three levels of transparency \cite{ayub2020model}.
+
+\textit{\textbf{White-box attacks}} assume complete knowledge of the detection system, including the model architecture, learned parameters, loss function, and training data. This level of access enables the attacker to compute exact gradients and generate highly optimized adversarial perturbations, often representing a worst-case scenario for robustness evaluation \cite{yuan2024simple, abou2020evaluation}. Although unrealistic for most real-world deployments, white-box settings are widely used as a benchmark to assess the lower bound of a model's security \cite{ayub2020model}.
+
+\textit{\textbf{Gray-box attacks}} represent an intermediate scenario in which the adversary possesses partial information, such as the feature extraction process, the learning algorithm, or the general data distribution, but lacks access to the trained parameters. In this setting, attackers typically rely on surrogate models trained on similar data to approximate the decision boundaries of the target NIDS. Due to the phenomenon of adversarial transferability, perturbations crafted against the surrogate often remain effective against the deployed system \cite{zhang2022adversarial, khorshidpour2018domain, vitorino2025reliable}.
+
+\textit{\textbf{Black-box attacks}} assume no internal knowledge of the NIDS and restrict the attacker to observing the system's outputs, such as class labels or confidence scores, in response to crafted inputs. These attacks are usually decision-based or score-based and require iterative probing of the system to infer exploitable vulnerabilities \cite{yuan2024simple, zhang2022adversarial}. Black-box threat models are generally considered the most realistic for operational NIDS deployed in production environments \cite{ayub2020model}.
+
+\subsubsection{Attacker Capabilities and Operational Phase}
+
+Adversarial attacks are further classified based on the stage of the machine learning pipeline at which the adversary intervenes \cite{huang2011adversarial}. 
+This distinction is commonly expressed through the dichotomy between causative and exploratory attacks.
+
+\textit{Causative attacks}, also known as poisoning attacks, occur during the training or retraining phase of the model. 
+In this scenario, the attacker injects carefully crafted malicious samples into the training dataset to corrupt the learned decision function \cite{rubinstein2009antidote}. 
+A representative strategy is the \emph{Boiling Frog} attack, where small perturbations are gradually introduced over multiple retraining cycles, subtly shifting the decision boundary until malicious traffic is classified as benign \cite{madani2018robustness}.
+
+\textit{Exploratory attacks}, or evasion attacks, target the inference phase, where the model parameters remain fixed \cite{huang2011adversarial}. 
+Here, the adversary manipulates test-time inputs to bypass the deployed NIDS without altering the training data. 
+In the network domain, this typically involves modifying traffic features, such as packet timing or flow statistics, so that malicious activity is misclassified as legitimate \cite{ayub2020model}.
+
+From an operational perspective, attacker capability is also constrained by the \emph{manipulation space}. 
+\textit{Feature-space attacks} operate directly on the numerical feature vectors used by the classifier, enabling efficient gradient-based optimization but often lacking realism due to the non-invertible nature of feature extraction \cite{han2021evaluating}. 
+In contrast, \textit{problem-space attacks} manipulate raw network traffic (e.g., packets or flows) before feature extraction, requiring the adversary to satisfy strict protocol and semantic constraints while preserving malicious functionality \cite{jiang2022fgmd}.
+
+\subsubsection{Adversarial Goals and Security Violations}
+
+The strategic objectives of an adversary are typically mapped to classical security violations \cite{zhang2015adversarial}. 
+\textit{Integrity attacks} are the most prevalent in NIDS and aim to induce false negatives by causing malicious traffic to be classified as benign \cite{huang2011adversarial}. 
+\textit{Availability attacks} seek to degrade the overall utility of the detection system by generating excessive false positives or overwhelming the classifier, effectively leading to denial-of-service conditions \cite{corona2013adversarial}. 
+\textit{Privacy attacks} focus on extracting sensitive information about the model or its training data through systematic probing \cite{miller2020adversarial}.
+
+Additionally, adversarial goals can be categorized by their specificity. 
+\textit{Targeted attacks} aim to cause misclassification of specific high-value traffic instances, whereas \textit{untargeted attacks} seek to maximize the overall error rate or reduce the confidence of the model across broad traffic classes \cite{alasad2026comprehensive}.
+
+\subsubsection{Domain-Specific Constraints in Network Traffic}
+
+Adversarial manipulation in the network domain is subject to strict structural and semantic constraints that distinguish NIDS from other AML application domains, such as computer vision. Perturbations must preserve protocol validity, respect feature value ranges, and maintain logical consistency across correlated attributes (e.g., transport-layer flags and protocol identifiers) \cite{hartl2020explainability, merzouk2022investigating}. Moreover, successful adversarial samples must retain their malicious functionality, ensuring that the attack objective, such as service disruption or unauthorized access, is still achieved after manipulation \cite{li2020adversarial}. 
+
+As a consequence, time-based features, including inter-arrival times and flow-level statistics, are frequently targeted in adversarial NIDS attacks, as they offer greater flexibility for manipulation while remaining semantically valid \cite{zhang2022adversarial}. These constraints significantly increase the complexity of problem-space attacks but are essential for producing realistic and deployable adversarial traffic.
+
+\subsection{Evasion Attacks}
+
+Evasion attacks constitute a fundamental inference-phase adversarial strategy against NIDS, in which an attacker aims to bypass a deployed detector without modifying its learned parameters. Unlike poisoning attacks, which corrupt the training process, evasion attacks exploit the sensitivity of ML and DL models to carefully crafted distribution shifts, inducing the misclassification of malicious traffic as benign at test time \cite{huang2011adversarial, ahmed2025network}. This paradigm represents a significant evolution from traditional signature obfuscation techniques toward systematic manipulation of the statistical and temporal representations learned by modern NIDS \cite{abomakhelb2025comprehensive}.
+
+\subsubsection{Adversarial Intervention Space}
+
+Evasion attacks can be categorized according to the space in which adversarial perturbations are applied: feature space or problem space (also referred to as traffic space) \cite{ibitoye2025threat}. 
+
+Feature-space attacks operate directly on the numerical feature vectors consumed by the classifier. 
+These methods, often adapted from computer vision, leverage gradient-based optimization to identify minimal perturbations that cross the decision boundary \cite{merzouk2022investigating, zhang2022adversarial}. 
+However, in the NIDS domain, feature extraction is typically non-differentiable and irreversible, rendering feature-space perturbations difficult or impossible to translate back into valid network traffic \cite{he2023adversarial}. 
+As a result, such attacks are frequently criticized for their limited physical realizability.
+
+Problem-space attacks, by contrast, directly manipulate raw network traffic (e.g., packets or PCAP traces) before feature extraction \cite{vitorino2023sok}. 
+The attacker modifies observable packet- or flow-level characteristics so that, once processed by the NIDS feature extractor, the resulting representation lies within the benign region of the model’s decision space. 
+Due to their end-to-end feasibility and independence from internal model knowledge, problem-space attacks represent the most realistic threat model for externally deployed NIDS \cite{han2021evaluating}.
+
+\subsubsection{Evasion Strategies and Traffic Manipulation Techniques}
+
+To achieve evasion, attackers employ a range of heuristic and algorithmic manipulation strategies targeting features known to be influential in classification decisions:
+
+\begin{itemize}
+    \item \textit{Temporal Reshaping:} Inter-arrival times (IAT), jitter, and flow duration are modified by introducing controlled delays between packets, allowing attackers to evade detectors sensitive to temporal regularities \cite{liu2025hard}.
+    \item \textit{Volumetric and Statistical Mimicry:} Attackers inject dummy or ``chaff'' packets to skew aggregate statistics such as average packet size, packet rate, or total byte count, while preserving the malicious payload \cite{abdelaty2021gadot}.
+    \item \textit{Header Manipulation:} Non-functional header fields, including Time-To-Live (TTL), TCP window size, or rarely used flags, are altered to exploit learned model biases while maintaining protocol validity \cite{guo2025knowml, md2025guardians}.
+    \item \textit{Packet Fragmentation:} Malicious payloads are split across multiple fragments to disrupt flow reconstruction or dilute discriminative features used by the detector \cite{debicha2023adv}.
+\end{itemize}
+
+These techniques are often combined to shift the statistical footprint of malicious traffic toward regions densely populated by benign samples, a strategy commonly referred to as \emph{mimicry} \cite{li2020adversarial}.
+
+\subsubsection{Domain Constraints and Semantic Preservation}
+
+A defining challenge of evasion attacks in the network domain is the necessity to satisfy strict syntactic, semantic, and functional constraints that are absent in unstructured domains such as image analysis \cite{hartl2020explainability}. 
+Perturbations must preserve protocol compliance, ensuring that packet headers, checksums, and field ranges remain valid; otherwise, malformed traffic may be dropped by intermediate network devices before reaching the NIDS or the intended target \cite{wang2023evasion}.
+
+Beyond syntactic validity, attackers must ensure \emph{malicious functionality preservation}, meaning that the modified traffic must still accomplish its original offensive objective \cite{li2020adversarial}. 
+For example, in Denial-of-Service (DoS) attacks, excessive temporal perturbations may reduce the effective transmission rate below the threshold required to exhaust victim resources \cite{han2021evaluating}. 
+Similarly, command-and-control (C\&C) communications or injection-based exploits must maintain payload semantics to remain executable on the target system \cite{cui2023cbseq, wang2024progen}.
+
+\subsubsection{The Inverse Feature-Mapping Problem}
+
+The practicality of evasion attacks is fundamentally constrained by the \emph{inverse feature-mapping problem}. 
+While an attacker may compute an optimal adversarial perturbation in feature space, reconstructing a valid network packet sequence that yields those exact feature values is often computationally intractable due to the one-way nature of feature extraction \cite{han2021evaluating}. 
+This gap between theoretical optimality and operational feasibility limits the effectiveness of purely gradient-based methods in real-world NIDS deployments \cite{debicha2023adv}.
+
+Consequently, recent research has increasingly focused on blind perturbation strategies, reinforcement learning-based traffic manipulation, and heuristic-driven approaches that do not rely on exact inverse mappings or internal model knowledge \cite{apruzzese2024adversarial}. 
+These methods, while less precise in theory, offer higher deployability and pose a more credible threat to modern ML-based NIDS infrastructures \cite{vitorino2023sok}.
+
+
+\subsection{Poisoning Attacks}
+
+Poisoning attacks, also referred to as \emph{causative attacks}, constitute an adversarial strategy aimed at compromising the learning phase of an ML model by intentionally manipulating the training dataset \cite{huang2011adversarial}. 
+In the context of NIDS, such attacks exploit a fundamental assumption underlying most learning algorithms, namely, that training and operational data are drawn from a stationary and trustworthy distribution \cite{he2023adversarial}. 
+By violating this assumption, an adversary can bias the model-construction process, leading to long-term degradation of detection performance.
+
+The primary objectives of poisoning attacks are typically mapped to integrity and availability violations. 
+Integrity-oriented poisoning aims to increase the false negative rate, allowing malicious traffic to bypass the detector undetected, whereas availability-oriented poisoning seeks to overwhelm the system with false positives, effectively rendering the NIDS unusable due to alert fatigue or resource exhaustion \cite{bao2018mitigating, ibitoye2025threat}.
+
+\subsubsection{Mechanisms of Training Data Manipulation}
+
+Poisoning attacks are commonly categorized according to the adversary’s manipulation strategy on the training set. 
+In \emph{data insertion} attacks, the adversary injects carefully crafted samples into the training dataset, whereas in \emph{data alteration} attacks, existing samples or their labels are modified to corrupt the learning process.
+
+A classical poisoning technique is the \emph{correlated outlier attack}, where spurious features are introduced into malicious training samples to induce the learner to associate those features with benign behavior \cite{huang2011adversarial}. 
+Similarly, \emph{red herring attacks} introduce auxiliary features alongside malicious payloads; once the model learns these features as part of a detection rule, the adversary removes them in subsequent attacks, thereby evading detection \cite{huang2011adversarial}. 
+
+In anomaly-based NIDS employing statistical learning techniques such as Principal Component Analysis (PCA), poisoning is often realized through \emph{variance injection}. 
+Here, adversaries introduce carefully engineered ``chaff'' traffic to inflate variance along specific dimensions, effectively rotating the learned normal subspace toward a malicious direction \cite{rubinstein2009antidote}. 
+As a consequence, subsequent high-volume attacks, such as Denial-of-Service (DoS) traffic, appear statistically consistent with the poisoned notion of normality \cite{rubinstein2009antidote}.
+
+More advanced poisoning strategies include \emph{label-flipping attacks}, in which malicious samples are deliberately mislabeled as benign (or vice versa), and \emph{backdoor attacks}, where hidden triggers are embedded during training to force the model to misclassify specific traffic patterns at inference time \cite{abomakhelb2025comprehensive}. 
+In backdoor scenarios, the classifier behaves normally on clean inputs but consistently fails when the attacker-defined trigger condition is satisfied.
+
+\subsubsection{Adaptive and Incremental Poisoning}
+
+A particularly insidious variant of poisoning is the \emph{Boiling Frog} strategy, which is designed to evade detection in systems that rely on periodic or continuous retraining \cite{rubinstein2009antidote}. 
+In this attack, the adversary initially introduces an imperceptible amount of poisoned data, gradually increasing its presence over multiple retraining cycles. 
+This incremental manipulation acclimates the detector to anomalous patterns, progressively shifting the decision boundary until large-scale malicious activity can be executed without triggering alarms.
+
+Such attacks are especially relevant for self-adaptive or semi-supervised NIDS deployed in non-stationary environments, where models are retrained to accommodate concept drift \cite{madani2018robustness}. 
+In these settings, false negatives produced by the current detector may be erroneously incorporated into future training sets as benign samples, thereby reinforcing and institutionalizing the model’s failure \cite{he2023adversarial}.
+
+\subsubsection{Practical Limitations and Operational Constraints}
+
+Despite their theoretical impact, poisoning attacks face substantial practical barriers. 
+Their success typically requires prolonged access to the training pipeline or influence over data collection mechanisms, capabilities that are more consistent with insider threats or compromised infrastructure than with external attackers \cite{ennaji2025adversarial}. 
+Moreover, poisoning must remain stealthy; anomalous deviations in the training data distribution risk triggering manual inspection or automated data sanitization mechanisms \cite{rubinstein2009antidote}.
+
+The feasibility of poisoning in NIDS is further constrained by the \emph{inverse feature-mapping problem}. 
+Because feature extraction from raw network traffic is non-differentiable and irreversible, it is often computationally infeasible to reconstruct valid, replayable network packets that yield attacker-specified feature values \cite{han2021evaluating}. 
+This limitation significantly reduces the practicality of feature-space poisoning attacks in real-world network environments \cite{miller2020adversarial}.
+
+\subsubsection{Defensive Countermeasures}
+
+To mitigate poisoning threats, several defensive strategies have been proposed. 
+Data sanitization techniques, such as the Reject On Negative Impact (RONI) defense, evaluate the influence of individual training samples and discard those that disproportionately degrade model performance \cite{huang2011adversarial}. 
+Robust statistical estimators, such as Median Absolute Deviation (MAD) or Laplace-based thresholds, can further reduce sensitivity to adversarial outliers by avoiding reliance on Gaussian assumptions \cite{rubinstein2009antidote}. 
+Additionally, controlled retraining procedures, trusted data sources, and human-in-the-loop validation remain critical safeguards against large-scale poisoning attempts.
+
+In summary, while poisoning attacks pose a severe threat to learning-based NIDS, particularly in adaptive and distributed training settings, their operational complexity and access requirements render them less prevalent than evasion attacks in real-world deployments. 
+Nevertheless, they remain a critical concern for insider threat models and emerging paradigms such as federated and self-learning intrusion detection systems \cite{abomakhelb2025comprehensive}.
+
+\subsection{Constraints in Network Traffic Manipulation}
+
+The architectural design of NIDS imposes stringent constraints on adversarial traffic manipulation that fundamentally distinguish the network domain from unstructured domains such as computer vision \cite{han2021evaluating}. 
+While adversarial examples in image classification can be generated through independent and continuous pixel-level perturbations, network traffic is governed by a rigid hierarchy of protocol rules, semantic dependencies, and physical limitations that severely restrict the space of realizable modifications \cite{wang2024progen, li2020adversarial}. 
+As a consequence, successful evasion strategies must operate in the \emph{problem-space}, ensuring that perturbed traffic remains syntactically valid, semantically coherent, temporally consistent, and functionally malicious \cite{merzouk2022investigating}.
+
+\subsubsection{Protocol Compliance and Syntactic Constraints}
+
+The most fundamental constraint in network traffic manipulation is strict protocol compliance \cite{abdelaty2021gadot}. 
+Perturbed traffic must adhere to the rules of the TCP/IP protocol stack to ensure that packets are processable by intermediate routers and capable of reaching the intended destination \cite{wang2023evasion}. 
+Any violation, such as incorrect checksums, malformed headers, or inconsistent sequence and acknowledgment numbers, results in packets being discarded before they can be analyzed by the NIDS, thereby nullifying the attack \cite{vitorino2023sok}.
+
+At the feature level, syntactic constraints prohibit the use of invalid value ranges and incoherent encodings. 
+Attributes such as packet size, flow duration, and byte counts must remain non-negative, while fields like Time-To-Live (TTL) are bounded by fixed protocol limits (e.g., 8-bit values capped at 255) \cite{merzouk2022investigating}. 
+Furthermore, many NIDS features are discrete or binary (e.g., TCP flags), and adversarial perturbations that produce continuous or fractional values cannot be reconstructed into valid packets \cite{debicha2023adv}. 
+Similarly, categorical features encoded via one-hot representations must preserve mutual exclusivity, as a packet cannot simultaneously belong to conflicting protocols such as TCP and UDP \cite{jiang2022fgmd}.
+
+\subsubsection{Semantic Preservation and Feature Interdependencies}
+
+Beyond syntactic validity, adversarial traffic must preserve semantic coherence across correlated features \cite{ennaji2025adversarial}. 
+Network telemetry exhibits strong interdependencies; modifying one feature often necessitates corresponding adjustments in others to maintain a logically consistent flow profile \cite{he2023adversarial}. 
+For example, an increase in the total number of transmitted bytes must be accompanied by changes in packet count or payload size, while specifying an application-layer service such as SSH for a UDP-based flow constitutes a semantic violation \cite{wang2024progen}.
+
+This challenge is exacerbated by the \emph{inverse feature-mapping problem}, whereby the transformation from raw packets to feature vectors is non-differentiable and irreversible \cite{han2021evaluating}. 
+Although an adversary may identify an optimal perturbation in feature space, reconstructing a set of replayable packets that yields exactly those values is often computationally intractable \cite{debicha2023adv}. 
+Moreover, problem-space manipulations frequently induce \emph{side-effect features}, where altering a target attribute inadvertently affects correlated features, potentially exposing the attack to detection \cite{vitorino2023sok}.
+
+\subsubsection{Temporal Consistency and Physical Limitations}
+
+Temporal dynamics constitute a critical and tightly constrained dimension of network behavior \cite{hartl2020explainability}. 
+Adversarial traffic must preserve causal ordering and timing semantics; for instance, acknowledgment packets cannot precede the data they acknowledge, and excessive delays may trigger connection timeouts or protocol retransmissions \cite{ennaji2025adversarial}. 
+While attackers may reshape traffic by increasing inter-arrival times (IAT) to mimic benign distributions, they are constrained by physical transmission limits and protocol-level timeout mechanisms \cite{liu2025hard}.
+
+Consequently, most practical evasion strategies focus on adding delays or injecting chaff traffic to increase temporal variance rather than arbitrarily decreasing IATs \cite{han2021evaluating}. 
+Perturbed temporal features must also remain statistically consistent, ensuring coherence between minimum, maximum, mean, and variance values within a flow \cite{zhang2022adversarial}. 
+Violations of these temporal relationships often result in traffic patterns that are easily distinguishable from legitimate behavior.
+
+\subsubsection{Malicious Functionality Preservation}
+
+A defining requirement of any realistic evasion attack is the preservation of malicious functionality \cite{jiang2022fgmd}. 
+Perturbations that alter payload contents risk disabling the attack itself, such as corrupting an SQL injection string or invalidating a buffer overflow exploit \cite{wang2024progen}. 
+Similarly, in volumetric attacks like Denial-of-Service (DoS), adversaries must ensure that traffic shaping does not reduce the transmission rate below the threshold required to exhaust the victim’s resources \cite{han2021evaluating}.
+
+In operational settings, attackers are often further constrained by limited control over legitimate background traffic and may only be capable of injecting additional packets along an ingress link \cite{rubinstein2009antidote}. 
+To remain stealthy, perturbations are frequently bounded by distortion metrics, such as limiting the Mean Absolute Percentage Error (MAPE) of modified features to within 20\%, to avoid detection by statistical anomaly detectors or human operators \cite{zhang2022adversarial}.
+
+\subsubsection{Infeasibility of Arbitrary Perturbations}
+
+Arbitrary perturbations are fundamentally infeasible in the network domain due to the structured, incomplete, and irregular nature of network traffic feature spaces \cite{he2023adversarial}. 
+Many combinations of feature values simply cannot be realized by any valid packet sequence, leaving large regions of the mathematical feature space unoccupied by real traffic \cite{yang2025robustness}. 
+As a result, naïvely adding Gaussian noise to feature vectors, while effective in image-based adversarial learning, produces samples that are syntactically invalid, semantically incoherent, and operationally meaningless in live networks.
+
+In summary, the effectiveness of adversarial manipulation against NIDS is bounded not by optimization capability alone, but by the necessity to satisfy strict protocol, semantic, temporal, and functional constraints. 
+Failure to respect these domain-specific requirements yields adversarial examples that may succeed in controlled laboratory evaluations but cannot be instantiated or transmitted in real-world network infrastructures \cite{merzouk2022investigating}.
+
+
+\section{Traffic Manipulation for Evasion}
+
+Adversarial evasion attacks against NIDS aim to bypass detection mechanisms by manipulating malicious traffic at inference time, without altering the parameters of the deployed model. Unlike poisoning attacks, which corrupt the learning process during training, evasion strategies operate exclusively on the input space, crafting traffic that preserves its malicious intent while appearing benign to the classifier \cite{huang2011adversarial, hashemi2020enhancing}.
+
+In the network domain, traffic manipulation for evasion must be conducted in the \emph{problem-space}, ensuring that all modifications remain syntactically valid, semantically coherent, temporally consistent, and operationally deployable. This requirement fundamentally distinguishes NIDS evasion from adversarial attacks in unstructured domains such as image classification, where arbitrary perturbations can be applied directly to raw inputs \cite{vitorino2023sok, li2020adversarial}. 
+
+Existing evasion strategies can be broadly categorized according to the abstraction level at which manipulation is performed. Feature-level approaches directly modify extracted traffic features to induce misclassification, while problem-space techniques operate on raw packets and flows, implicitly influencing the resulting feature representation \cite{wang2023evasion}. This section focuses on feature-level perturbation techniques, which constitute the theoretical foundation upon which many traffic manipulation frameworks, including the manipulator extended in this thesis, are built.
+
+\subsection{Feature-Level Perturbation Techniques}
+
+Feature-level perturbations (FLA) represent a class of adversarial evasion attacks in which malicious network traffic is modified at the level of extracted features to induce misclassification by machine learning-based NIDS. These attacks exploit the sensitivity of both traditional and DL models to small, carefully crafted perturbations that shift malicious samples across learned decision boundaries into regions associated with benign behavior \cite{yuan2024simple, zhang2022adversarial}. Since model parameters remain unchanged, FLA are particularly attractive to adversaries operating under realistic constraints where retraining or direct system compromise is infeasible \cite{huang2011adversarial}.
+
+\subsubsection{Taxonomy of Feature-Level Perturbation Strategies}
+
+Feature-level evasion techniques are commonly categorized based on the degree of adversarial knowledge and their reliance on model internals \cite{alotaibi2023adversarial}.
+
+In white-box settings, where the adversary has full access to the target model’s architecture and parameters, perturbations are computed using the gradient of the loss function with respect to the input features. 
+The Fast Gradient Sign Method (FGSM) applies a single-step update in the direction of maximal loss increase, while iterative variants such as the Basic Iterative Method (BIM) and Projected Gradient Descent (PGD) refine the perturbation over multiple steps to improve evasion success \cite{sharma2024systematic}. 
+More selective approaches, such as the Jacobian-based Saliency Map Attack (JSMA), identify and perturb only the most influential features, minimizing the overall distortion introduced into the sample. 
+Optimization-based attacks like the Carlini and Wagner (C\&W) method further refine this process by explicitly minimizing perturbation magnitude while enforcing misclassification constraints \cite{ayub2020model}.  
+
+In more realistic black-box or gray-box scenarios, adversaries lack access to gradients and internal parameters, relying instead on model outputs or binary decisions. 
+Decision-based attacks such as Boundary Attack and HopSkipJumpAttack iteratively refine adversarial samples using only classification feedback \cite{zhang2022adversarial}. 
+Generative approaches employ models such as Generative Adversarial Networks (GANs), including IDSGAN and WGAN-based frameworks, to learn the manifold of benign traffic and project malicious samples onto it \cite{wang2024progen}. 
+Alternatively, heuristic optimization techniques such as Genetic Algorithms (GA) and Particle Swarm Optimization (PSO) search the feature space for configurations that minimize anomaly scores while respecting domain constraints \cite{jiang2022fgmd}.
+
+\subsubsection{Functional Preservation and Feature Selection}
+
+A defining challenge of feature-level perturbation in NIDS is the requirement to preserve malicious functionality while altering the feature representation \cite{merzouk2022investigating}. 
+To achieve this, attackers conceptually partition the feature space into \emph{functional} and \emph{mutable} attributes \cite{wang2023evasion}.
+
+Functional features, such as protocol identifiers, destination addresses, and exploit-critical flags, must remain unchanged to ensure the attack reaches the target and executes correctly \cite{jiang2022fgmd}. 
+Consequently, adversarial manipulation is primarily focused on mutable dimensions, including inter-arrival times (IAT), packet sizes (e.g., via payload padding), TCP window sizes, and flow-level statistical aggregates \cite{han2021evaluating}. 
+These features exert a significant influence on NIDS decision-making while allowing controlled modification without violating protocol semantics.
+
+A common strategy is \emph{mimicry}, wherein malicious features are shifted toward the statistical distribution of benign traffic, effectively camouflaging the attack within densely populated regions of the feature space \cite{li2020adversarial}. 
+Advanced frameworks explicitly incorporate domain constraints during optimization to ensure that perturbations remain protocol-compliant and semantically coherent \cite{wang2024progen}.
+
+\subsubsection{Limitations and Deployability Challenges}
+
+Despite their effectiveness in controlled evaluations, feature-level perturbations face substantial obstacles in real-world deployment \cite{debicha2023adv}. 
+The most significant challenge is the \emph{inverse feature-mapping problem}: the extraction of NIDS features from raw packets is non-differentiable and irreversible, making it difficult to reconstruct a valid packet sequence that precisely matches an optimized adversarial feature vector \cite{han2021evaluating}. 
+
+Additionally, network features exhibit strong interdependencies; modifying one attribute often necessitates coordinated changes in others to maintain semantic consistency \cite{ennaji2025adversarial}. 
+Naïve perturbations that ignore these relationships produce infeasible traffic patterns that are either discarded by the network stack or trivially detected by the NIDS \cite{vitorino2023sok}. 
+
+From an operational perspective, many black-box attacks assume repeated querying of the target system to refine perturbations. 
+In practice, NIDS rarely expose confidence scores or labels to external entities, and excessive probing can itself trigger defensive mechanisms or blacklist the attacker \cite{liu2025hard}. 
+Moreover, the computational overhead of iterative optimization or generative training often precludes the use of feature-level attacks in real-time evasion scenarios \cite{alasad2026comprehensive}.
+
+In summary, feature-level perturbation techniques provide critical insights into the vulnerabilities of learning-based NIDS but are constrained by realism, deployability, and problem-space feasibility. 
+These limitations motivate the development of traffic manipulation frameworks that operate directly on network packets while implicitly shaping the resulting feature representation, an approach explored in the subsequent sections of this thesis.
+
+
+\subsection{Traffic-Level Manipulation Frameworks}
+
+The demonstrated vulnerability of ML-NIDS to adversarial manipulation has motivated a transition from abstract feature-space attacks toward traffic-level (problem-space) evasion frameworks that are physically realizable in operational networks \cite{vitorino2023sok}. 
+Traffic-level manipulation operates directly on raw network packets and flows, such as those contained in PCAP traces or generated in live traffic streams, so that the features extracted by the NIDS fall within regions associated with benign behavior \cite{liu2025hard}. 
+
+Unlike feature-level perturbations, which directly modify numerical vectors, traffic-level frameworks must contend with the \emph{inverse feature-mapping problem}: the transformation from raw packets to structured features is non-differentiable, lossy, and irreversible \cite{debicha2023adv}. 
+As a result, effective evasion requires indirect control over the feature representation through carefully constrained packet- and flow-level transformations.
+
+Traffic-level evasion frameworks employ a range of algorithmic strategies to alter observable traffic characteristics while preserving protocol validity and malicious functionality.
+
+Recent approaches formulate traffic manipulation as a sequential decision-making problem. 
+The NetMasquerade framework models traffic modification as a Finite Horizon Markov Decision Process, leveraging a pre-trained Traffic-BERT encoder to capture benign traffic semantics and guide a reinforcement learning agent in selecting packet-level modifications \cite{liu2025hard}. 
+Perturbations are applied to controllable attributes such as packet sizes and inter-packet delays (IPD), allowing the attacker to reshape traffic distributions without violating protocol constraints. 
+Similarly, ProGen employs a traffic-space Generative Adversarial Network (GAN), based on DoppelGANger, to project malicious flows into the benign manifold within a Basic Feature Sequence (BFS) representation \cite{wang2024progen}.
+
+Other frameworks rely on heuristic or rule-based transformations that target directly controllable flow statistics. 
+Approaches such as Adv-Bot manipulate flow duration, packet counts, and byte volumes while enforcing syntactic and semantic constraints through projection operators \cite{debicha2023adv}. 
+Sequence-aware models, including TANTRA, utilize recurrent architectures such as Long Short-Term Memory (LSTM) networks to reshape packet arrival patterns so that attack traffic statistically mimics benign temporal behavior \cite{han2021evaluating}.
+
+Practical implementations frequently adopt non-payload-based obfuscation techniques that avoid modifying exploit content. 
+These include packet fragmentation and splitting, injection of dummy or ``chaff'' packets, and manipulation of packet ordering or spacing to distort aggregate statistics such as mean packet size or packets-per-second rates \cite{vitorino2023sok}. 
+Some early approaches also exploit discrepancies between NIDS parsing and host stack behavior by injecting packets with invalid sequence numbers or checksums that are ignored by the victim but processed by the detector, thereby polluting the NIDS state \cite{hashemi2020enhancing}.
+
+\subsubsection{Constraints and Realism in Adversarial Environments}
+
+The feasibility of traffic-level manipulation is governed by a hierarchy of domain-specific constraints that are largely absent in unstructured domains such as computer vision \cite{vitorino2023sok, wang2024progen}. 
+
+All adversarial packets must conform to the TCP/IP protocol stack to ensure they are forwarded by intermediate devices and processed by the destination host \cite{wang2023evasion}. 
+Header fields must maintain valid checksums, sequence numbers, and field ranges, while categorical attributes such as protocol identifiers must remain logically consistent \cite{debicha2023adv}.
+
+Beyond syntactic validity, traffic-level evasion must preserve the malicious intent of the original attack \cite{he2023adversarial}. 
+Arbitrary payload modifications risk rendering exploits non-executable, while excessive timing perturbations may induce connection timeouts or reduce attack throughput below effective thresholds, particularly in Denial-of-Service (DoS) scenarios \cite{han2021evaluating, liu2025hard}.
+
+Traffic-level modifications often induce \emph{side-effect features}, whereby changes to one observable attribute inadvertently affect correlated features \cite{vitorino2023sok}. 
+For example, injecting chaff packets increases not only packet counts but also total bytes and temporal variance, potentially reintroducing detectable anomalies \cite{vitorino2023sok}. 
+Managing these collateral effects is a central challenge in problem-space evasion.
+
+\subsubsection{Deployment Challenges and Operational Feasibility}
+
+Despite their realism, traffic-level frameworks face significant obstacles in operational deployment.
+
+Most real-world NIDS operate as ``invisible'' systems, providing no confidence scores or labels to external entities \cite{vitorino2023sok}. 
+Consequently, attackers are constrained to hard-label black-box settings, relying on query-efficient strategies or the transferability of adversarial samples crafted against surrogate models \cite{liu2025hard}. 
+Excessive probing may itself trigger defensive mechanisms or source blacklisting.
+
+The non-stationary nature of network traffic further complicates evasion. Periodic retraining or online learning can shift decision boundaries over time, rendering previously effective adversarial flows obsolete and forcing attackers to continually adapt their strategies \cite{apruzzese2024adversarial}.
+
+Traffic-level evasion must often be executed under strict timing constraints. 
+Frameworks requiring extensive optimization or long convergence times are impractical for high-throughput or real-time attack scenarios \cite{liu2025hard}.
+
+\subsubsection{Evaluation Methodologies}
+
+Evaluating traffic-level evasion requires metrics that extend beyond conventional classification performance. 
+Standard measures such as accuracy and F1-score fail to capture the security implications of undetected malicious traffic \cite{han2021evaluating}. 
+Accordingly, prior work proposes metrics such as Malicious Traffic Evasion Rate (MER), Detection Evasion Rate (DER), and Probability Decline Rate (PDR) to quantify both evasion effectiveness and collateral detectability \cite{han2021evaluating}. 
+
+A comprehensive evaluation must simultaneously assess \emph{validity} (replayability and protocol correctness), \emph{evasiveness} (ability to bypass detection), and \emph{maliciousness} (preservation of attack functionality) \cite{he2023adversarial}. 
+Additional analyses, including ablation studies and cross-model transferability testing, are commonly employed to evaluate robustness across architectures and threat models \cite{debicha2023adv}.
+
+
+\section{Traffic Manipulation and Evasion Techniques}
+
+Traffic manipulation for evasion represents a critical class of adversarial attacks targeting NIDS by modifying malicious network traffic to bypass detection while preserving attack semantics. Unlike poisoning attacks that compromise training data, evasion strategies operate exclusively at inference time, crafting traffic that appears benign to classifiers while maintaining malicious intent \cite{huang2011adversarial, hashemi2020enhancing}.
+
+\subsection{Fragmentation as a Primary Evasion Vector}
+
+Packet fragmentation constitutes one of the most effective and widely studied traffic-level evasion techniques, exploiting fundamental discrepancies between traffic interpretation mechanisms of NIDS and end-host protocol stacks. Rather than altering payload semantics, fragmentation operates at the measurement and reconstruction phase by subdividing malicious payloads into multiple protocol data units (PDUs), creating a semantic gap between the traffic representation observed by the NIDS and that reconstructed by the destination host \cite{corona2013adversarial, vitorino2023sok}.
+
+\subsubsection{Fragmentation Mechanisms and Protocol Context}
+
+\textbf{IPv4 Fragmentation Fundamentals:}
+IP fragmentation was introduced in IPv4 as a network-layer mechanism to enable transmission of packets exceeding the Maximum Transmission Unit (MTU) of intermediate network links. When a packet exceeds the MTU of the next hop, routers can dynamically fragment it into multiple smaller units, each encapsulated within its own IPv4 header, with reassembly performed exclusively at the destination host.
+
+The IPv4 header contains three essential fragmentation fields: (i) \textbf{Identification} - a 16-bit value shared by all fragments from the same original packet; (ii) \textbf{Flags} - including the Don't Fragment (DF) and More Fragments (MF) indicators; and (iii) \textbf{Fragment Offset} - specifying fragment position within the original payload in 8-byte blocks. Each fragment carries only a portion of the original payload while duplicating the IPv4 header, with reassembly occurring through fragment buffering until all offsets are received or reassembly timeout expires.
+
+\textbf{IPv6 Fragmentation Evolution:}
+Unlike IPv4, IPv6 prohibits fragmentation by intermediate routers, requiring fragmentation to be performed exclusively by the source host using dedicated Fragment Extension Headers. This architectural change was designed to simplify router processing and improve forwarding efficiency. However, since most fragmentation-based evasion techniques target IPv4 deployments, which remain prevalent in operational networks, IPv6's modified approach has not eliminated the fundamental vulnerability \cite{bittau2005fragmentation}.
+
+\subsubsection{Impact on NIDS Processing and Feature Extraction}
+
+Packet fragmentation fundamentally disrupts the visibility of malicious activity during critical phases of NIDS operation, particularly feature extraction and flow reconstruction.
+
+\textbf{Packet-Level Distortions:}
+Fragmentation directly alters low-level packet attributes including frame size, segment length, and TCP length fields, while simultaneously duplicating header information across multiple fragments. These modifications distort features such as packet length distributions, header-to-payload ratios, and protocol-specific heuristics used by NIDS classifiers \cite{abdelaty2021gadot}.
+
+\textbf{Flow-Level Statistical Manipulation:}
+At the flow level, fragmentation increases packet counts associated with single logical transmissions while preserving 5-tuple flow identifiers. This manipulation significantly alters aggregate statistics including packet count, average packet size, bytes per second, flow duration, and packets-per-second metrics, even though underlying communication semantics remain unchanged \cite{cui2023cbseq}. In flow-based and sequence-based NIDS, these distortions affect statistical aggregates such as mean packet size, variance, and temporal dispersion commonly used to distinguish benign from malicious behavior.
+
+\textbf{Signature Dissolution:}
+A critical consequence of fragmentation is signature dissolution, where coherent patterns required for positive detection become distributed across multiple packets. Due to performance constraints, many NIDS architectures perform limited or no stateful reassembly, instead analyzing packets or sub-flows in isolation \cite{md2025guardians}. When malicious content is fragmented, detection systems may fail to observe complete attack signatures within their analysis windows, particularly impacting machine learning-based detectors that rely on fixed-length feature windows or partial flow observations \cite{abdelaty2021gadot}.
+
+\subsubsection{Advanced Fragmentation Attack Strategies}
+
+\textbf{Temporal Obfuscation Integration:}
+Sophisticated attackers combine fragmentation with temporal manipulation strategies, introducing artificial delays between fragments to manipulate inter-arrival times (IAT) and reshape traffic's statistical distribution. This technique shifts malicious flows toward the denser manifold of benign traffic, rendering both statistical anomaly detectors and deep learning models ineffective \cite{liu2025hard, he2023adversarial}.
+
+\textbf{Reassembly Policy Exploitation:}
+Adversaries exploit divergent reassembly policies implemented by different operating systems for handling duplicated, overlapping, or out-of-order fragments. NIDS sensors, often optimized for performance rather than protocol completeness, fail to replicate these diverse reassembly behaviors faithfully, resulting in detectors observing partial or incoherent attack representations \cite{md2025guardians, bittau2005fragmentation}.
+
+\textbf{Network-Layer Evasion Combinations:}
+Fragmentation can be combined with additional manipulation strategies including packet reordering, intentional transmission delays, and invalid sequence number injection to increase ambiguity in temporal features such as inter-arrival times and sequence coherence. These multi-vector approaches are particularly effective against machine learning-based NIDS that depend on statistical regularities extracted from packet sequences \cite{han2021evaluating, ennaji2025adversarial}.
+
+\subsubsection{Empirical Evidence and Performance Impact}
+
+Extensive experimental evaluation has documented the significant impact of fragmentation-based evasion on contemporary NIDS systems across multiple detection paradigms.
+
+\textbf{Classical Classifier Vulnerability:}
+Systematic fragmentation substantially degrades performance of traditional classifiers including Support Vector Machines (SVMs) and Decision Trees by disrupting feature coherence and sequence consistency. These models, which rely heavily on engineered statistical features, prove particularly vulnerable when their underlying feature assumptions are violated through fragmentation \cite{sarikaya2023raids}.
+
+\textbf{Deep Learning Model Susceptibility:}
+Even state-of-the-art deep learning-based detectors demonstrate significant vulnerability to fragmentation attacks. Evaluations of the LUCID framework revealed that fragmenting HTTP GET flood traffic causes malicious flows to become statistically indistinguishable from benign ones, increasing False Negative Rates (FNR) to values as high as 61.5\% \cite{abdelaty2021gadot}. These findings indicate that sequence-aware architectures remain susceptible when temporal and structural assumptions underlying feature extraction are systematically violated.
+
+\subsubsection{Defensive Countermeasures and Operational Trade-offs}
+
+\textbf{Stateful Reassembly Requirements:}
+Mitigating fragmentation-based evasion typically requires implementing comprehensive IP defragmentation and stateful TCP reassembly prior to feature extraction. While such defenses can substantially restore detection capability—recovering up to 28\% of lost recall in empirical studies—they impose significant computational overhead \cite{md2025guardians}.
+
+\textbf{Performance and Scalability Constraints:}
+Operational evaluations report CPU utilization increases of approximately 12\% when robust reassembly mechanisms are enabled, highlighting a fundamental trade-off between detection robustness and high-throughput performance requirements. This overhead is particularly problematic in high-speed network environments where NIDS must process traffic at line rate without introducing latency bottlenecks.
+
+\textbf{Persistent Vulnerability Assessment:}
+The computational trade-off between detection accuracy and operational efficiency makes IP fragmentation a persistent and practical evasion vector, particularly against ML-based detectors that operate on partial observations or rely on aggregated statistics rather than full payload reconstruction. Consequently, fragmentation remains an attractive technique for adversaries seeking low-cost, high-impact evasion strategies against contemporary NIDS deployments.
+
+\subsection{Feature-Level Perturbation Techniques}
+
+Feature-level perturbations (FLA) represent a class of adversarial evasion attacks in which malicious network traffic is modified at the level of extracted features to induce misclassification by machine learning-based NIDS. These attacks exploit the sensitivity of both traditional and deep learning models to small, carefully crafted perturbations that shift malicious samples across learned decision boundaries into regions associated with benign behavior \cite{yuan2024simple, zhang2022adversarial}.
+
+\subsubsection{Taxonomy of Feature-Level Perturbation Strategies}
+
+Feature-level evasion techniques are commonly categorized based on the degree of adversarial knowledge and their reliance on model internals \cite{alotaibi2023adversarial}. In white-box settings, perturbations are computed using gradients of the loss function with respect to input features, employing methods such as the Fast Gradient Sign Method (FGSM) and iterative variants including Basic Iterative Method (BIM) and Projected Gradient Descent (PGD) \cite{sharma2024systematic}.
+
+In realistic black-box scenarios, adversaries rely on model outputs or binary decisions rather than internal parameters. Decision-based attacks such as Boundary Attack iteratively refine adversarial samples using only classification feedback, while generative approaches employ Generative Adversarial Networks (GANs) to learn benign traffic manifolds and project malicious samples onto them \cite{wang2024progen}. Heuristic optimization techniques including Genetic Algorithms (GA) and Particle Swarm Optimization (PSO) search feature spaces for configurations that minimize anomaly scores while respecting domain constraints \cite{jiang2022fgmd}.
+
+\subsubsection{Functional Preservation and Operational Constraints}
+
+A defining challenge of feature-level perturbation in NIDS is the requirement to preserve malicious functionality while altering the feature representation \cite{merzouk2022investigating}. Attackers must conceptually partition the feature space into \emph{functional} and \emph{mutable} attributes, where functional features such as protocol identifiers and destination addresses must remain unchanged to ensure attack success \cite{wang2023evasion}.
+
+Adversarial manipulation primarily targets mutable dimensions including inter-arrival times, packet sizes, TCP window sizes, and flow-level statistical aggregates that influence NIDS decision-making while allowing controlled modification without violating protocol semantics \cite{han2021evaluating}. Common strategies include \emph{mimicry}, wherein malicious features are shifted toward statistical distributions of benign traffic, effectively camouflaging attacks within densely populated regions of the feature space \cite{li2020adversarial}.
+
+\subsubsection{Limitations and Deployability Challenges}
+
+Despite effectiveness in controlled evaluations, feature-level perturbations face substantial obstacles in real-world deployment \cite{debicha2023adv}. The most significant challenge is the \emph{inverse feature-mapping problem}: feature extraction from raw packets is non-differentiable and irreversible, making it difficult to reconstruct valid packet sequences that precisely match optimized adversarial feature vectors \cite{han2021evaluating}.
+
+Network features exhibit strong interdependencies, where modifying one attribute often necessitates coordinated changes in others to maintain semantic consistency \cite{ennaji2025adversarial}. Naïve perturbations that ignore these relationships produce infeasible traffic patterns that are either discarded by network stacks or trivially detected by NIDS \cite{vitorino2023sok}. Moreover, many black-box attacks assume repeated querying of target systems, which is impractical for operational NIDS that rarely expose confidence scores and may trigger defensive mechanisms through excessive probing \cite{liu2025hard}.
+
+\subsection{Traffic-Level Manipulation Frameworks}
+
+The demonstrated vulnerability of ML-NIDS to adversarial manipulation has motivated development of traffic-level (problem-space) evasion frameworks that operate directly on raw network packets and flows rather than abstract feature representations \cite{vitorino2023sok}. These frameworks must address the \emph{inverse feature-mapping problem} by achieving indirect control over feature representations through carefully constrained packet- and flow-level transformations.
+
+Recent approaches formulate traffic manipulation as sequential decision-making problems. NetMasquerade models traffic modification as a Finite Horizon Markov Decision Process, leveraging pre-trained Traffic-BERT encoders to capture benign traffic semantics and guide reinforcement learning agents in selecting packet-level modifications \cite{liu2025hard}. ProGen employs traffic-space Generative Adversarial Networks based on DoppelGANger to project malicious flows into benign manifolds within Basic Feature Sequence representations \cite{wang2024progen}.
+
+Practical implementations frequently adopt non-payload-based obfuscation techniques including packet fragmentation and splitting, injection of dummy packets, and manipulation of packet ordering or spacing to distort aggregate statistics while avoiding modification of exploit content \cite{vitorino2023sok}. Some approaches exploit discrepancies between NIDS parsing and host stack behavior by injecting packets with invalid sequence numbers that are ignored by victims but processed by detectors, thereby polluting NIDS state \cite{hashemi2020enhancing}.
+
+\subsubsection{Constraints and Realism in Adversarial Environments}
+
+Traffic-level manipulation is governed by domain-specific constraints largely absent in unstructured domains such as computer vision \cite{vitorino2023sok}. All adversarial packets must conform to TCP/IP protocol stacks to ensure forwarding by intermediate devices and processing by destination hosts. Traffic-level modifications often induce \emph{side-effect features}, where changes to one observable attribute inadvertently affect correlated features, potentially reintroducing detectable anomalies \cite{vitorino2023sok}.
+
+Operational deployment faces additional challenges including the invisible nature of most real-world NIDS that provide no confidence scores to external entities, constraining attackers to hard-label black-box settings \cite{vitorino2023sok}. The non-stationary nature of network traffic further complicates evasion, as periodic retraining can shift decision boundaries over time, forcing continual adaptation of attack strategies \cite{apruzzese2024adversarial}.
+
+
+
+
+The effectiveness of NIDS critically depends on the accurate reassembly of network traffic, which constitutes a prerequisite for stateful analysis and the reconstruction of original communication semantics from fragmented or segmented protocol data units (PDUs) \cite{corona2013adversarial}. 
+In contemporary detection pipelines, this process is typically implemented through flow exporters and analyzers, such as Argus or Zeek, which aggregate individual packets into bidirectional flows based on a canonical five-tuple composed of source and destination IP addresses, source and destination ports, and the transport protocol \cite{debicha2023adv}. 
+For online detection, packets are often collected within predefined temporal windows to form sub-flows, enabling early classification before the termination of a connection \cite{doriguzzi2020lucid}.
+
+\subsubsection*{Challenges in Flow and Fragment Reassembly}
+
+Despite its central role, flow reassembly in NIDS is inherently fragile due to a persistent semantic gap between the reconstruction policies implemented at the sensor and those enforced by the destination host’s operating system \cite{corona2013adversarial}. 
+This gap is exacerbated by both natural network behavior and adversarial manipulation strategies.
+
+\textbf{Packet Fragmentation and Segmentation.}  
+Adversaries exploit reassembly inconsistencies by fragmenting malicious payloads into multiple packets such that the interpretation of the traffic at the NIDS differs from that at the destination host \cite{bittau2005fragmentation}. 
+Different operating systems apply divergent policies for handling duplicated, overlapping, or out-of-order fragments, which NIDS sensors, often designed for performance rather than completeness, fail to replicate faithfully \cite{md2025guardians}. 
+As a result, the detector may observe only partial or incoherent representations of the attack.
+
+\textbf{Packet Ordering and Network Noise.}  
+Even in the absence of active manipulation, packet reordering and stochastic transmission delays are common in real networks due to multiplexing and congestion \cite{han2021evaluating}. 
+These phenomena complicate causal interpretation, leading to anomalous sequences such as acknowledgment packets arriving before the data they reference \cite{ennaji2025adversarial}. 
+Such disorder undermines the assumptions of detection models that rely on temporally consistent packet sequences.
+
+\textbf{Temporal Reshaping and Timing Attacks.}  
+Attackers further exploit temporal dependencies by intentionally reshaping inter-arrival times (IAT) or injecting packet delays to evade detectors sensitive to timing-based features \cite{liu2025hard}. 
+While moderate timing perturbations may successfully bypass detection, excessive delays risk triggering transport-layer timeouts, potentially disrupting the malicious activity before reassembly is completed \cite{vitorino2023sok}.
+
+\subsubsection*{Implications for Feature Extraction and Detection Accuracy}
+
+Fragmentation and temporal inconsistencies have profound implications for both feature extraction and classification accuracy in ML-based NIDS.
+
+\textbf{Signature Dissolution:}  
+When malicious payloads are distributed across multiple fragments, the coherent patterns required for positive detection are dissolved into independent observations \cite{md2025guardians}. 
+Unless full stateful reassembly is performed, the detector fails to observe a complete attack signature within its analysis window, leading to systematic false negatives \cite{abdelaty2021gadot}.
+
+\textbf{Volumetric and Statistical Distortion:}  
+Fragmentation directly alters low-level attributes such as \texttt{TCP Len}, decreasing individual packet sizes while inflating aggregate metrics including packet count, flow duration, and packets-per-second ratios \cite{debicha2023adv}. 
+These distortions propagate to higher-level statistical features, such as mean packet size and variance, used to model benign behavior in flow-based detectors \cite{cui2023cbseq}.
+
+\textbf{Impact on Detection Performance:}  
+Empirical evaluations of DL-based frameworks, including LUCID, demonstrate that fragmented malicious traffic often becomes statistically indistinguishable from benign flows, increasing the False Negative Rate (FNR) to values as high as 61.5\% under realistic attack scenarios \cite{abdelaty2021gadot}. 
+This highlights a structural vulnerability in sequence-based and windowed detection architectures when their reassembly assumptions are violated.
+
+\subsubsection*{Computational Trade-offs and Operational Constraints}
+
+While incorporating IP defragmentation and stateful TCP reassembly can substantially restore detection performance, such defenses impose a non-negligible computational overhead \cite{md2025guardians}. 
+Experimental studies report increases of approximately 12\% in CPU utilization when robust reassembly mechanisms are enabled, presenting a critical trade-off between security resilience and throughput requirements in high-speed network environments \cite{md2025guardians}. 
+Consequently, many operational NIDS adopt partial or heuristic reassembly strategies, leaving them persistently vulnerable to fragmentation-based evasion techniques.
+
+\section{Datasets and Adversarial Training for NIDS}
+
+The empirical evaluation of NIDS, as well as the assessment of their robustness against adversarial manipulation, is fundamentally dependent on the availability of high-fidelity and statistically representative benchmark datasets \cite{he2023adversarial}. 
+Historically, the NSL-KDD dataset has served as a foundational reference for intrusion detection research, having been introduced as a refined version of the KDD Cup '99 dataset to mitigate issues related to data redundancy and class imbalance \cite{alasad2026comprehensive}. 
+Despite its continued use due to its simplicity, NSL-KDD is increasingly regarded as obsolete, as it fails to capture the protocol diversity, traffic volume, and attack complexity characteristic of modern network environments \cite{merzouk2022investigating}.
+
+Contemporary research has therefore shifted toward more realistic benchmarks such as CICIDS-2017 and its successor CSE-CIC-IDS2018, which provide up-to-date attack taxonomies and a rich set of flow- and packet-level features extracted from common protocols including HTTP, HTTPS, FTP, and SSH \cite{alasad2026comprehensive}. 
+The UNSW-NB15 dataset further improves realism by incorporating nine distinct attack categories and traffic captured from a hybrid real–synthetic testbed \cite{abou2020evaluation}. 
+For domain-specific scenarios, BoT-IoT and MedBIoT focus on the unique behavioral patterns of Internet of Things (IoT) infrastructures, while Kitsune enables the evaluation of unsupervised anomaly detection through packet-based feature sequences \cite{jiang2022fgmd}. 
+More recent datasets such as HIKARI21 address the growing prevalence of encrypted traffic by incorporating application-layer attacks encapsulated within HTTPS sessions \cite{vitorino2025reliable}.
+
+\subsection{Taxonomical Limitations of Existing Datasets}
+
+Despite their widespread adoption, existing NIDS datasets exhibit fundamental limitations that hinder the generalizability of learned detection models. 
+A primary concern is the lack of realism: many benchmarks are generated in controlled laboratory environments using automated traffic-generation tools with fixed configurations, resulting in limited structural variability and artificially inflated detection performance \cite{guo2025knowml}. 
+Privacy constraints further exacerbate this issue, as the sensitivity of real enterprise traffic prevents the release of unmasked payloads, forcing researchers to rely on simulated datasets that fail to capture naturally occurring behavioral diversity \cite{he2023adversarial}.
+
+Another critical limitation is the insufficient coverage of adversarial behaviors. 
+Standard datasets typically lack samples explicitly designed to evade machine learning-based detectors, compelling researchers to synthesize adversarial examples using techniques such as the Fast Gradient Sign Method (FGSM) or Jacobian-based Saliency Map Attacks (JSMA) \cite{sarikaya2023raids}. 
+However, these feature-space perturbations often neglect the physical and protocol-level constraints of real network traffic, limiting their practical relevance \cite{hashemi2020enhancing}.
+
+Finally, most benchmarks are static and implicitly assume data stationarity, whereas real-world network traffic is inherently non-stationary and subject to continuous concept drift \cite{apruzzese2024adversarial}. 
+As a result, models trained on fixed datasets tend to degrade rapidly when deployed in operational environments, exposing a critical gap between laboratory evaluation and real-world performance.
+
+
+
+\subsection{Adversarial Data Augmentation and Robustness Optimization}
+
+To counter evasion strategies, adversarial training (AT) has emerged as a primary defensive paradigm for improving the robustness of NIDS \cite{bountakas2023defense}. 
+This approach augments the training distribution with adversarially perturbed samples, forcing the model to learn more resilient decision boundaries \cite{roshan2024boosting}. 
+Frameworks such as GADoT employ GANs to synthesize ``fake-benign'' attack traffic, reducing undetected DDoS flows from over 60\% to approximately 1.8\% in controlled evaluations \cite{abdelaty2021gadot}.
+
+More advanced defense architectures integrate multi-stage strategies, combining Gaussian Data Augmentation during training with inference-time Feature Squeezing to suppress adversarial noise \cite{roshan2024boosting}. 
+However, adversarial training is susceptible to the ``blind-spot'' problem, whereby models remain vulnerable to attack families not represented in the augmented dataset \cite{vitorino2023sok}. 
+Additionally, retraining on adversarial examples often induces covariate shift, degrading accuracy on clean data and necessitating larger model capacities to maintain baseline performance \cite{ye2019adversarial}.
+
+Emerging self-supervised approaches, such as BERT-ps models pre-trained on terabyte-scale raw traffic, demonstrate improved robustness to network noise and distributional shifts compared to models trained from scratch or those relying solely on handcrafted augmentation \cite{yang2025robustness}. 
+Finally, the integration of explainable NIDS (X-IDS) and human-in-the-loop analysis is increasingly recognized as essential for bridging the semantic gap between numerical detection scores and actionable security decisions, thereby enhancing trust in automated defense mechanisms \cite{wei2023xnids}.
+
+\section{Research Tools and Frameworks}
+
+This section provides an overview of the two main tools utilized in this research: LUCID, a lightweight deep learning-based NIDS for DDoS attack detection, and Traffic Manipulator, a black-box traffic mutation framework for generating adversarial network traffic. These tools represent the foundation for the experimental evaluation and extension work presented in subsequent chapters.
+
+\subsection{LUCID: Lightweight Deep Learning Solution for DDoS Detection}
+
+LUCID (Lightweight, Usable CNN in DDoS Detection) is a practical deep learning framework specifically designed for DDoS attack detection in resource-constrained online environments \cite{doriguzzi2020lucid}. The system leverages Convolutional Neural Networks (CNNs) to learn behavioral patterns of both DDoS and benign traffic flows while maintaining low processing overhead and rapid attack detection capabilities.
+
+\subsubsection{Architecture and Design Principles}
+
+LUCID employs a dataset-agnostic preprocessing mechanism that generates traffic observations consistent with those collected in existing online systems, where detection algorithms must process segments of traffic flows captured within predefined time windows. This design choice addresses a fundamental challenge in operational NIDS deployment: the need to perform classification on partial flow observations rather than complete connection traces.
+
+The core CNN architecture consists of multiple convolutional layers followed by dense classification layers, optimized for both detection accuracy and computational efficiency. The model operates on traffic flow representations encoded as fixed-size matrices, where each matrix element corresponds to specific packet-level or flow-level features extracted from network telemetry.
+
+Key design principles of LUCID include:
+\begin{itemize}
+\item \textbf{Lightweight Processing}: Minimal computational overhead suitable for deployment in resource-constrained environments
+\item \textbf{Real-time Classification}: Rapid inference capabilities enabling online detection with low latency
+\item \textbf{Flow-based Analysis}: Processing of bidirectional traffic flows rather than individual packets
+\item \textbf{Time-windowed Operation}: Classification based on traffic segments collected over configurable time windows
+\end{itemize}
+
+\subsubsection{Feature Extraction and Traffic Representation}
+
+LUCID's preprocessing pipeline transforms raw packet captures (PCAP files) into structured feature matrices suitable for CNN processing. Traffic flows are defined by the standard 5-tuple (source IP, source port, destination IP, destination port, protocol) and are processed bidirectionally. The feature extraction process captures both spatial and temporal characteristics of network communications.
+
+The framework supports configurable parameters including:
+\begin{itemize}
+\item \textbf{Packets per Flow}: Maximum number of packets aggregated within a single flow sample
+\item \textbf{Time Window}: Length of the temporal window for flow segmentation (in seconds)
+\item \textbf{Traffic Type}: Selective processing of benign, malicious, or mixed traffic
+\end{itemize}
+
+This flexibility enables adaptation to different network environments and traffic characteristics while preserving the semantic structure of communication patterns essential for effective DDoS detection.
+
+\subsubsection{Experimental Validation and Performance}
+
+LUCID has been extensively evaluated on standard benchmark datasets including CIC-IDS2017, CSE-CIC-IDS2018, and CIC-DDoS2019, demonstrating competitive detection accuracy while maintaining significantly lower computational requirements compared to traditional deep learning approaches. The framework's effectiveness has been validated across various DDoS attack types, including volumetric, protocol, and application-layer attacks.
+
+The practical deployment characteristics of LUCID make it particularly suitable for evaluating adversarial robustness, as its lightweight nature enables rapid experimentation with different defensive strategies and attack scenarios.
+
+\subsection{Traffic Manipulator: Black-Box Adversarial Traffic Generation}
+\label{sec:existing_manipulator}
+Traffic Manipulator is a black-box traffic mutation framework designed to generate adversarial network traffic that evades learning-based Network Intrusion Detection Systems (ML-NIDS) while preserving the original malicious functionality. The framework leverages Particle Swarm Optimization (PSO) to efficiently explore the high-dimensional, discrete traffic space and identify effective, functionality-preserving perturbations.
+
+Proposed by Han et al.~\cite{han2021evaluating}, Traffic Manipulator is among the first frameworks to generate \emph{realistic, functionality-preserving adversarial traffic} capable of bypassing machine-learning-based NIDS.
+
+Unlike feature-space attacks, where crafted perturbations cannot be reliably translated back into valid packet-level representations, the manipulator operates directly in \emph{traffic space}. It modifies raw packets while maintaining protocol compliance and respecting the operational constraints of the underlying malicious activity.
+
+\subsubsection{Design Philosophy}
+
+The tool follows a two-stage process combining a \textbf{Generative Adversarial Network (GAN)} with \textbf{Particle Swarm Optimization (PSO)}:
+
+\begin{enumerate}
+    \item \textbf{Adversarial Sample Search via GAN}.  
+    A GAN is trained on the target dataset to learn approximate decision boundaries of the ML-NIDS.  
+    The generator produces candidate samples near the benign/malicious boundary, guiding the subsequent optimization toward regions likely to induce misclassification.  
+    Due to the non-differentiability of NIDS feature extraction pipelines, GAN outputs are not used directly as traffic, but rather as \emph{boundary indicators} to initialize PSO.
+
+    \item \textbf{Traffic Mutation via PSO}.  
+    A customized PSO is used to iteratively mutate malicious traffic samples.  
+    Each particle encodes a sequence of manipulation operators, and fitness is evaluated by querying the target NIDS.  
+    The PSO converges toward mutation patterns that reduce the model’s malicious confidence while keeping functionality intact.
+\end{enumerate}
+
+\subsubsection{Optimization-Based Traffic Mutation}
+
+The core innovation of Traffic Manipulator lies in its formulation of traffic evasion as a constrained optimization problem. Given original malicious network traffic and a target benign feature set, the framework iteratively searches for traffic mutations that minimize the distance between extracted features and the target distribution while maintaining attack functionality.
+
+The PSO-based search mechanism operates through the following key components:
+\begin{itemize}
+\item \textbf{Particle Representation}: Each particle represents a potential traffic mutation strategy
+\item \textbf{Fitness Evaluation}: Objective function measuring similarity to target benign features
+\item \textbf{Constraint Satisfaction}: Preservation of protocol validity and attack semantics
+\item \textbf{Neighborhood Search}: Local optimization within particle swarms for efficient exploration
+\end{itemize}
+
+\subsubsection{Manipulation Operators}
+
+The manipulator employs domain-specific operators that selectively modify traffic attributes deemed safe to perturb, including:
+
+\begin{itemize}
+    \item adjustments to packet inter-arrival times,
+    \item controlled modifications of transport-layer payload sizes,
+    \item packet reordering and fine-grained timing perturbations,
+    \item insertion or modification of protocol-layer options when semantically permissible.
+\end{itemize}
+
+These operators are carefully designed to ensure that the generated adversarial traffic remains functionality-preserving, protocol-compliant, and semantically valid, while increasing the likelihood of being classified as benign by the target ML-NIDS.
+
+\subsubsection{End-to-End Workflow}
+
+Given an initial malicious network flow, the framework initializes mutation candidates using GAN-informed latent representations and iteratively refines them through Particle Swarm Optimization (PSO). At each iteration, candidate mutations are evaluated against the target detection model, and the optimization process continues until the traffic is misclassified as benign or a predefined iteration budget is exhausted.
+
+Through this structured optimization strategy, the manipulator enables effective gray-box, and, in certain configurations, fully black-box, evasion. It is widely regarded as a strong baseline for generating realistic, functionality-preserving adversarial network traffic.
+
+\subsubsection{Model-Agnostic and Generic Framework}
+
+A distinguishing characteristic of Traffic Manipulator is its model-agnostic design, which enables evaluation against diverse NIDS architectures without requiring knowledge of internal model parameters or training data. This black-box approach more accurately reflects real-world attack scenarios where adversaries lack access to target system internals.
+
+The framework has been validated against multiple state-of-the-art NIDS implementations, including Kitsune, demonstrating consistent evasion effectiveness across different detection paradigms. The generic architecture facilitates rapid adaptation to new target systems and traffic types, making it a valuable tool for systematic adversarial robustness evaluation.
+
+\subsubsection{Practical Implementation and Deployment}
+
+Traffic Manipulator provides a comprehensive implementation including feature extractors, traffic rebuilders, and evaluation metrics necessary for end-to-end adversarial traffic generation. The framework supports standard network trace formats and integrates with existing traffic analysis tools, enabling seamless incorporation into security research workflows.
+
+Configurable parameters allow fine-tuning of the optimization process to balance between evasion effectiveness and computational efficiency, supporting both comprehensive security evaluations and rapid prototyping of defensive mechanisms.
+
+Overall, the choice of traffic representation and feature taxonomy plays a decisive role not only in detection accuracy but also in the robustness of NIDS against evasion and adversarial manipulation. 
+Understanding these feature dimensions is therefore essential for evaluating the effectiveness and limitations of traffic manipulation strategies, as explored in subsequent chapters.

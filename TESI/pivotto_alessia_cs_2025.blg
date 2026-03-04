@@ -1,0 +1,50 @@
+This is BibTeX, Version 0.99d (TeX Live 2023/Debian)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: pivotto_alessia_cs_2025.aux
+The style file: plain.bst
+Database file #1: biblio.bib
+Warning--I didn't find a database entry for "ayub2020evaluation"
+Warning--I didn't find a database entry for "coulouris"
+Warning--empty journal in bao2018mitigating
+You've used 61 entries,
+            2118 wiz_defined-function locations,
+            832 strings with 18240 characters,
+and the built_in function-call counts, 25155 in all, are:
+= -- 2412
+> -- 1492
+< -- 18
++ -- 595
+- -- 524
+* -- 1941
+:= -- 4174
+add.period$ -- 191
+call.type$ -- 61
+change.case$ -- 444
+chr.to.int$ -- 0
+cite$ -- 62
+duplicate$ -- 853
+empty$ -- 1742
+format.name$ -- 524
+if$ -- 5182
+int.to.chr$ -- 0
+int.to.str$ -- 61
+missing$ -- 61
+newline$ -- 308
+num.names$ -- 122
+pop$ -- 433
+preamble$ -- 1
+purify$ -- 383
+quote$ -- 0
+skip$ -- 615
+stack$ -- 0
+substring$ -- 1518
+swap$ -- 214
+text.length$ -- 18
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 244
+warning$ -- 1
+while$ -- 227
+width$ -- 63
+write$ -- 671
+(There were 3 warnings)

@@ -1,0 +1,408 @@
+\begin{thebibliography}{10}
+
+\bibitem{abdelaty2021gadot}
+Maged Abdelaty, Sandra Scott-Hayward, Roberto Doriguzzi-Corin, and Domenico
+  Siracusa.
+\newblock Gadot: Gan-based adversarial training for robust ddos attack
+  detection.
+\newblock In {\em 2021 IEEE Conference on Communications and Network Security
+  (CNS)}, pages 119--127. IEEE, 2021.
+
+\bibitem{abomakhelb2025comprehensive}
+Abdulruhman Abomakhelb, Kamarularifin~Abd Jalil, Alya~Geogiana Buja, Abdulraqeb
+  Alhammadi, and Abdulmajeed~M Alenezi.
+\newblock A comprehensive review of adversarial attacks and defense strategies
+  in deep neural networks.
+\newblock {\em Technologies}, 13(5):202, 2025.
+
+\bibitem{abou2020evaluation}
+Rana Abou~Khamis and Ashraf Matrawy.
+\newblock Evaluation of adversarial training on different types of neural
+  networks in deep learning-based idss.
+\newblock In {\em 2020 international symposium on networks, computers and
+  communications (ISNCC)}, pages 1--6. IEEE, 2020.
+
+\bibitem{abou2020investigating}
+Rana Abou~Khamis, M~Omair Shafiq, and Ashraf Matrawy.
+\newblock Investigating resistance of deep learning-based ids against
+  adversaries using min-max optimization.
+\newblock In {\em ICC 2020-2020 IEEE international conference on communications
+  (ICC)}, pages 1--7. IEEE, 2020.
+
+\bibitem{ahmed2025network}
+Meaad Ahmed and Qutaiba Abdullah.
+\newblock Network intrusion detection systems: Machine learning-based attack
+  and remedy strategies--a review.
+\newblock {\em Al-Salam Journal for Engineering and Technology}, 4(2):11--29,
+  2025.
+
+\bibitem{ahmed2025signature}
+Usama Ahmed, Mohammad Nazir, Amna Sarwar, Tariq Ali, El-Hadi~M Aggoune, Tariq
+  Shahzad, and Muhammad~Adnan Khan.
+\newblock Signature-based intrusion detection using machine learning and deep
+  learning approaches empowered with fuzzy clustering.
+\newblock {\em Scientific Reports}, 15(1):1726, 2025.
+
+\bibitem{alasad2026comprehensive}
+Qutaiba Alasad, Meaad Ahmed, Shahad Alahmed, Omer~T Khattab, Saba~Alaa
+  Abdulwahhab, and Jiann-Shuin Yuan.
+\newblock A comprehensive review: The evolving cat-and-mouse game in network
+  intrusion detection systems leveraging machine learning.
+\newblock {\em Journal of Cybersecurity and Privacy}, 6(1):13, 2026.
+
+\bibitem{alotaibi2023adversarial}
+Afnan Alotaibi and Murad~A Rassam.
+\newblock Adversarial machine learning attacks against intrusion detection
+  systems: A survey on strategies and defense.
+\newblock {\em Future Internet}, 15(2):62, 2023.
+
+\bibitem{apruzzese2024adversarial}
+Giovanni Apruzzese, Aurore Fass, and Fabio Pierazzi.
+\newblock When adversarial perturbations meet concept drift: an exploratory
+  analysis on ml-nids.
+\newblock In {\em Proceedings of the 2024 Workshop on Artificial Intelligence
+  and Security}, pages 149--160, 2024.
+
+\bibitem{ayub2020model}
+Md~Ahsan Ayub, William~A Johnson, Douglas~A Talbert, and Ambareen Siraj.
+\newblock Model evasion attack on intrusion detection systems using adversarial
+  machine learning.
+\newblock In {\em 2020 54th annual conference on information sciences and
+  systems (CISS)}, pages 1--6. IEEE, 2020.
+
+\bibitem{bao2018mitigating}
+Ziyi Bao and Luis Mu{\~n}oz-Gonz{\'a}lez.
+\newblock Mitigating evasion attacks against machine learning systems through
+  dimensionality reduction and denoising.
+\newblock 2018.
+
+\bibitem{bittau2005fragmentation}
+Andrea Bittau.
+\newblock The fragmentation attack in practice.
+\newblock In {\em Ieee symposium on security and privacy, ieee computer
+  society}, 2005.
+
+\bibitem{bountakas2023defense}
+Panagiotis Bountakas, Apostolis Zarras, Alexios Lekidis, and Christos Xenakis.
+\newblock Defense strategies for adversarial machine learning: A survey.
+\newblock {\em Computer Science Review}, 49:100573, 2023.
+
+\bibitem{brauckhoff2009applying}
+Daniela Brauckhoff, Kave Salamatian, and Martin May.
+\newblock Applying pca for traffic anomaly detection: Problems and solutions.
+\newblock In {\em IEEE INFOCOM 2009}, pages 2866--2870. IEEE, 2009.
+
+\bibitem{corona2013adversarial}
+Igino Corona, Giorgio Giacinto, and Fabio Roli.
+\newblock Adversarial attacks against intrusion detection systems: Taxonomy,
+  solutions and open issues.
+\newblock {\em Information sciences}, 239:201--225, 2013.
+
+\bibitem{cui2023cbseq}
+Susu Cui, Cong Dong, Meng Shen, Yuling Liu, Bo~Jiang, and Zhigang Lu.
+\newblock Cbseq: A channel-level behavior sequence for encrypted malware
+  traffic detection.
+\newblock {\em IEEE Transactions on Information Forensics and Security},
+  18:5011--5025, 2023.
+
+\bibitem{debicha2023adv}
+Islam Debicha, Benjamin Cochez, Tayeb Kenaza, Thibault Debatty, Jean-Michel
+  Dricot, and Wim Mees.
+\newblock Adv-bot: Realistic adversarial botnet attacks against network
+  intrusion detection systems.
+\newblock {\em Computers \& Security}, 129:103176, 2023.
+
+\bibitem{dhadhania2024unleashing}
+Archan Dhadhania, Jitendra Bhatia, Rachana Mehta, Sudeep Tanwar, Ravi Sharma,
+  and Amit Verma.
+\newblock Unleashing the power of sdn and gnn for network anomaly detection:
+  State-of-the-art, challenges, and future directions.
+\newblock {\em Security and Privacy}, 7(1):e337, 2024.
+
+\bibitem{doriguzzi2020lucid}
+Roberto Doriguzzi-Corin, Stuart Millar, Sandra Scott-Hayward, Jesus
+  Martinez-del Rincon, and Domenico Siracusa.
+\newblock Lucid: A practical, lightweight deep learning solution for ddos
+  attack detection.
+\newblock {\em IEEE Transactions on Network and Service Management},
+  17(2):876--889, 2020.
+
+\bibitem{ennaji2025adversarial}
+Sabrine Ennaji, Fabio De~Gaspari, Dorjan Hitaj, Alicia Kbidi, and
+  Luigi~Vincenzo Mancini.
+\newblock Adversarial challenges in network intrusion detection systems:
+  Research insights and future prospects.
+\newblock {\em IEEE Access}, 2025.
+
+\bibitem{esmaeili2023gnn}
+Bardia Esmaeili, Amin Azmoodeh, Ali Dehghantanha, Gautam Srivastava, Hadis
+  Karimipour, and Jerry Chun-Wei Lin.
+\newblock A gnn-based adversarial internet of things malware detection
+  framework for critical infrastructure: Studying gafgyt, mirai and tsunami
+  campaigns.
+\newblock {\em IEEE Internet of Things Journal}, 2023.
+
+\bibitem{guo2025knowml}
+Xin~Fan Guo, Albert~Merono Penuela, Sergio Maffeis, and Fabio Pierazzi.
+\newblock Knowml: Improving generalization of ml-nids with attack knowledge
+  graphs.
+\newblock {\em arXiv preprint arXiv:2506.19802}, 2025.
+
+\bibitem{han2021deepaid}
+Dongqi Han, Zhiliang Wang, Wenqi Chen, Ying Zhong, Su~Wang, Han Zhang, Jiahai
+  Yang, Xingang Shi, and Xia Yin.
+\newblock Deepaid: Interpreting and improving deep learning-based anomaly
+  detection in security applications.
+\newblock In {\em Proceedings of the 2021 ACM SIGSAC Conference on Computer and
+  Communications Security}, pages 3197--3217, 2021.
+
+\bibitem{han2021evaluating}
+Dongqi Han, Zhiliang Wang, Ying Zhong, Wenqi Chen, Jiahai Yang, Shuqiang Lu,
+  Xingang Shi, and Xia Yin.
+\newblock Evaluating and improving adversarial robustness of machine
+  learning-based network intrusion detectors.
+\newblock {\em IEEE Journal on Selected Areas in Communications},
+  39(8):2632--2647, 2021.
+
+\bibitem{hartl2020explainability}
+Alexander Hartl, Maximilian Bachl, Joachim Fabini, and Tanja Zseby.
+\newblock Explainability and adversarial robustness for rnns.
+\newblock In {\em 2020 IEEE Sixth International Conference on Big Data
+  Computing Service and Applications (BigDataService)}, pages 148--156. IEEE,
+  2020.
+
+\bibitem{hashemi2020enhancing}
+Mohammad~J Hashemi and Eric Keller.
+\newblock Enhancing robustness against adversarial examples in network
+  intrusion detection systems.
+\newblock In {\em 2020 IEEE Conference on Network Function Virtualization and
+  Software Defined Networks (NFV-SDN)}, pages 37--43. IEEE, 2020.
+
+\bibitem{he2023adversarial}
+Ke~He, Dan~Dongseong Kim, and Muhammad~Rizwan Asghar.
+\newblock Adversarial machine learning for network intrusion detection systems:
+  A comprehensive survey.
+\newblock {\em IEEE Communications Surveys \& Tutorials}, 25(1):538--566, 2023.
+
+\bibitem{10005100}
+Ke~He, Dan~Dongseong Kim, and Muhammad~Rizwan Asghar.
+\newblock Adversarial machine learning for network intrusion detection systems:
+  A comprehensive survey.
+\newblock {\em IEEE Communications Surveys \& Tutorials}, 25(1):538--566, 2023.
+
+\bibitem{huang2011adversarial}
+Ling Huang, Anthony~D Joseph, Blaine Nelson, Benjamin~IP Rubinstein, and J~Doug
+  Tygar.
+\newblock Adversarial machine learning.
+\newblock In {\em Proceedings of the 4th ACM workshop on Security and
+  artificial intelligence}, pages 43--58, 2011.
+
+\bibitem{ibitoye2025threat}
+Olakunle Ibitoye, Rana Abou-Khamis, Ashraf Matrawy, M~Omair Shafiq, et~al.
+\newblock The threat of adversarial attacks against machine learning in network
+  security: a survey.
+\newblock {\em Journal of Electronics and Electrical Engineering}, pages
+  16--59, 2025.
+
+\bibitem{jiang2022fgmd}
+Hongling Jiang, Jinzhi Lin, and Haiyan Kang.
+\newblock Fgmd: A robust detector against adversarial attacks in the iot
+  network.
+\newblock {\em Future Generation Computer Systems}, 132:194--210, 2022.
+
+\bibitem{khorshidpour2018domain}
+Zeinab Khorshidpour, Jafar Tahmoresnezhad, Sattar Hashemi, and Ali Hamzeh.
+\newblock Domain invariant feature extraction against evasion attack.
+\newblock {\em International Journal of Machine Learning and Cybernetics},
+  9(12):2093--2104, 2018.
+
+\bibitem{li2020adversarial}
+Deqiang Li and Qianmu Li.
+\newblock Adversarial deep ensemble: Evasion attacks and defenses for malware
+  detection.
+\newblock {\em IEEE Transactions on Information Forensics and Security},
+  15:3886--3900, 2020.
+
+\bibitem{liu2025hard}
+Zixuan Liu, Yi~Zhao, Zhuotao Liu, Qi~Li, Chuanpu Fu, Guangmeng Zhou, and Ke~Xu.
+\newblock A hard-label black-box evasion attack against ml-based malicious
+  traffic detection systems.
+\newblock {\em arXiv preprint arXiv:2510.14906}, 2025.
+
+\bibitem{madani2018robustness}
+Pooria Madani and Natalija Vlajic.
+\newblock Robustness of deep autoencoder in intrusion detection under
+  adversarial contamination.
+\newblock In {\em Proceedings of the 5th Annual Symposium and Bootcamp on Hot
+  Topics in the Science of Security}, pages 1--8, 2018.
+
+\bibitem{mccarthy2021feature}
+Andrew McCarthy, Panagiotis Andriotis, Essam Ghadafi, and Phil Legg.
+\newblock Feature vulnerability and robustness assessment against adversarial
+  machine learning attacks.
+\newblock In {\em 2021 international conference on cyber situational awareness,
+  data analytics and assessment (CyberSA)}, pages 1--8. IEEE, 2021.
+
+\bibitem{md2025guardians}
+Khandakar Md~Shafin, GM~Abdullah Al~Kafi, and Saha Reno.
+\newblock Guardians of the network: An ensemble learning framework with
+  adversarial alignment for evasive cyber threat detection.
+\newblock {\em Engineering Reports}, 7(10):e70419, 2025.
+
+\bibitem{merzouk2022investigating}
+Mohamed~Amine Merzouk, Fr{\'e}d{\'e}ric Cuppens, Nora Boulahia-Cuppens, and
+  Reda Yaich.
+\newblock Investigating the practicality of adversarial evasion attacks on
+  network intrusion detection.
+\newblock {\em Annals of Telecommunications}, 77(11):763--775, 2022.
+
+\bibitem{miller2020adversarial}
+David~J Miller, Zhen Xiang, and George Kesidis.
+\newblock Adversarial learning targeting deep neural network classification: A
+  comprehensive review of defenses against attacks.
+\newblock {\em Proceedings of the IEEE}, 108(3):402--433, 2020.
+
+\bibitem{neupane2022explainable}
+Subash Neupane, Jesse Ables, William Anderson, Sudip Mittal, Shahram Rahimi,
+  Ioana Banicescu, and Maria Seale.
+\newblock Explainable intrusion detection systems (x-ids): A survey of current
+  methods, challenges, and opportunities.
+\newblock {\em IEEE Access}, 10:112392--112415, 2022.
+
+\bibitem{roshan2024black}
+Khushnaseeb Roshan and Aasim Zafar.
+\newblock Black-box adversarial transferability: An empirical study in
+  cybersecurity perspective.
+\newblock {\em Computers \& Security}, 141:103853, 2024.
+
+\bibitem{roshan2024boosting}
+Ms~Khushnaseeb Roshan and Aasim Zafar.
+\newblock Boosting robustness of network intrusion detection systems: A novel
+  two phase defense strategy against untargeted white-box optimization
+  adversarial attack.
+\newblock {\em Expert Systems with Applications}, 249:123567, 2024.
+
+\bibitem{rubinstein2009antidote}
+Benjamin~IP Rubinstein, Blaine Nelson, Ling Huang, Anthony~D Joseph, Shing-hon
+  Lau, Satish Rao, Nina Taft, and J~Doug Tygar.
+\newblock Antidote: understanding and defending against poisoning of anomaly
+  detectors.
+\newblock In {\em Proceedings of the 9th ACM SIGCOMM Conference on Internet
+  Measurement}, pages 1--14, 2009.
+
+\bibitem{sarikaya2023raids}
+Alper Sar{\i}kaya, Banu~G{\"u}nel K{\i}l{\i}{\c{c}}, and Mehmet Demirci.
+\newblock Raids: Robust autoencoder-based intrusion detection system model
+  against adversarial attacks.
+\newblock {\em Computers \& Security}, 135:103483, 2023.
+
+\bibitem{sauka2022adversarial}
+Kudzai Sauka, Gun-Yoo Shin, Dong-Wook Kim, and Myung-Mook Han.
+\newblock Adversarial robust and explainable network intrusion detection
+  systems based on deep learning.
+\newblock {\em Applied Sciences}, 12(13):6451, 2022.
+
+\bibitem{sharma2024systematic}
+Sanidhya Sharma and Zesheng Chen.
+\newblock A systematic study of adversarial attacks against network intrusion
+  detection systems.
+\newblock {\em Electronics}, 13(24):5030, 2024.
+
+\bibitem{shaukat2022novel}
+Kamran Shaukat, Suhuai Luo, and Vijay Varadharajan.
+\newblock A novel method for improving the robustness of deep learning-based
+  malware detectors against adversarial attacks.
+\newblock {\em Engineering Applications of Artificial Intelligence},
+  116:105461, 2022.
+
+\bibitem{sun2024gnn}
+Zhenlu Sun, Andr{\'e}~MH Teixeira, and Salman Toor.
+\newblock Gnn-ids: Graph neural network based intrusion detection system.
+\newblock In {\em Proceedings of the 19th international conference on
+  availability, reliability and security}, pages 1--12, 2024.
+
+\bibitem{tian2021analysis}
+Qi~Tian, Kun Kuang, Kelu Jiang, Fei Wu, and Yisen Wang.
+\newblock Analysis and applications of class-wise robustness in adversarial
+  training.
+\newblock In {\em Proceedings of the 27th ACM SIGKDD Conference on Knowledge
+  Discovery \& Data Mining}, pages 1561--1570, 2021.
+
+\bibitem{vitorino2023sok}
+Jo{\~a}o Vitorino, Isabel Pra{\c{c}}a, and Eva Maia.
+\newblock Sok: Realistic adversarial attacks and defenses for intelligent
+  network intrusion detection.
+\newblock {\em Computers \& Security}, 134:103433, 2023.
+
+\bibitem{vitorino2025reliable}
+Jo{\~a}o Vitorino, Miguel Silva, Eva Maia, and Isabel Pra{\c{c}}a.
+\newblock Reliable feature selection for adversarially robust cyber-attack
+  detection.
+\newblock {\em Annals of Telecommunications}, 80(3):341--355, 2025.
+
+\bibitem{wang2024progen}
+Minxiao Wang, Ning Yang, Nicolas~J Forcade-Perkins, and Ning Weng.
+\newblock Progen: Projection-based adversarial attack generation against
+  network intrusion detection.
+\newblock {\em IEEE Transactions on Information Forensics and Security},
+  19:5476--5491, 2024.
+
+\bibitem{wang2023evasion}
+Shunyao Wang, Ryan~KL Ko, Guangdong Bai, Naipeng Dong, Taejun Choi, and Yanjun
+  Zhang.
+\newblock Evasion attack and defense on machine learning models in
+  cyber-physical systems: A survey.
+\newblock {\em IEEE communications surveys \& tutorials}, 26(2):930--966, 2023.
+
+\bibitem{wei2023xnids}
+Feng Wei, Hongda Li, Ziming Zhao, and Hongxin Hu.
+\newblock $\{$xNIDS$\}$: Explaining deep learning-based network intrusion
+  detection systems for active intrusion responses.
+\newblock In {\em 32nd USENIX Security Symposium (USENIX Security 23)}, pages
+  4337--4354, 2023.
+
+\bibitem{yang2025robustness}
+Luming Yang, Lin Liu, Jun-jie Huang, Jiangyong Shi, Shaojing Fu, Yongjun Wang,
+  and Jinshu Su.
+\newblock Robustness matters: Pre-training can enhance the performance of
+  encrypted traffic analysis.
+\newblock {\em IEEE Transactions on Information Forensics and Security}, 2025.
+
+\bibitem{yang2025self}
+Shuo Yang, Xinran Zheng, Jinze Li, Jinfeng Xu, Xinchen Zhang, and Edith~CH
+  Ngai.
+\newblock Self-supervised adaptation method to concept drift for network
+  intrusion detection.
+\newblock {\em IEEE Transactions on Dependable and Secure Computing}, 2025.
+
+\bibitem{ye2019adversarial}
+Shaokai Ye, Kaidi Xu, Sijia Liu, Hao Cheng, Jan-Henrik Lambrechts, Huan Zhang,
+  Aojun Zhou, Kaisheng Ma, Yanzhi Wang, and Xue Lin.
+\newblock Adversarial robustness vs. model compression, or both?
+\newblock In {\em Proceedings of the IEEE/CVF international conference on
+  computer vision}, pages 111--120, 2019.
+
+\bibitem{yuan2024simple}
+Xinwei Yuan, Shu Han, Wei Huang, Hongliang Ye, Xianglong Kong, and Fan Zhang.
+\newblock A simple framework to enhance the adversarial robustness of deep
+  learning-based intrusion detection system.
+\newblock {\em Computers \& Security}, 137:103644, 2024.
+
+\bibitem{zhang2022adversarial}
+Chaoyun Zhang, Xavier Costa-Perez, and Paul Patras.
+\newblock Adversarial attacks against deep learning-based network intrusion
+  detection systems and defense mechanisms.
+\newblock {\em IEEE/ACM Transactions on Networking}, 30(3):1294--1311, 2022.
+
+\bibitem{zhang2015adversarial}
+Fei Zhang, Patrick~PK Chan, Battista Biggio, Daniel~S Yeung, and Fabio Roli.
+\newblock Adversarial feature selection against evasion attacks.
+\newblock {\em IEEE transactions on cybernetics}, 46(3):766--777, 2015.
+
+\bibitem{zhao2025unified}
+Jianjin Zhao, Zhiwei Cui, Junsong Fu, Meng Shen, and Qi~Li.
+\newblock A unified framework for robust encrypted malicious traffic detection
+  in adverse environments via graph structure learning.
+\newblock {\em IEEE Transactions on Network Science and Engineering}, 2025.
+
+\end{thebibliography}

@@ -1,0 +1,104 @@
+\chapter{Conclusions and Future Work}
+\label{cha:conclusions}
+
+This thesis has examined the structural and statistical vulnerabilities of ML-NIDS when confronted with adversarially manipulated network traffic. While recent literature frequently reports near-perfect detection rates on benchmark datasets, the results presented in this work demonstrate that such performance metrics may provide a misleading sense of security when adversarial conditions are introduced.
+
+The central objective of this research was to investigate whether flow-based ML-NIDS remain reliable when malicious traffic is deliberately altered in a manner that preserves its semantic intent while perturbing its statistical and structural representation. To this end, an existing GAN-PSO adversarial manipulation framework was extended with a protocol-compliant packet fragmentation engine FRANTIC, enabling the generation of traffic samples that simultaneously modify feature-space statistics and packet-level structure.
+
+The experimental findings confirm that current flow-based detection models are highly sensitive to such perturbations. Even moderate manipulations significantly degrade classification performance, and when fragmentation is introduced, detection accuracy collapses in several scenarios. These results highlight a fundamental fragility: models trained on static datasets learn decision boundaries that are not invariant to realistic traffic transformations. Consequently, robustness cannot be assumed from high baseline accuracy alone.
+
+Beyond demonstrating an evasion mechanism, this thesis contributes to a broader understanding of how feature extraction pipelines, rather than classifier architectures alone, constitute critical attack surfaces in ML-based security systems. The fragmentation strategy does not directly attack the model weights; instead, it alters the statistical representation of traffic prior to classification. This distinction underscores the importance of considering the entire detection pipeline, including preprocessing and feature aggregation, when evaluating adversarial resilience.
+
+\section{Summary of Contributions}
+
+The primary contributions of this thesis can be articulated along methodological, experimental, and analytical dimensions.
+
+\begin{itemize}
+
+\item \textbf{Extension of an Adversarial Manipulation Framework.}  
+This work enhances an existing GAN-PSO traffic manipulation framework by integrating a structural perturbation module capable of performing controlled IP fragmentation. Unlike purely statistical manipulation approaches, the extended framework generates adversarial traffic that modifies both high-level flow features and low-level packet composition. This dual manipulation significantly increases the attack surface and more closely approximates realistic adversarial behavior.
+
+\item \textbf{Design and Implementation of an RFC-Compliant Fragmentation Engine.}  
+A key contribution lies in the implementation of a fragmentation mechanism that adheres strictly to IPv4 standards (RFC 791). Ensuring protocol compliance guarantees that generated adversarial samples are not artificial artifacts but valid, routable traffic instances capable of traversing network infrastructure. This design choice strengthens the realism and practical relevance of the experimental evaluation.
+
+\item \textbf{Comprehensive Experimental Evaluation Across Manipulation Scenarios.}  
+Through systematic experimentation, this thesis quantified the impact of statistical manipulation alone and in combination with packet fragmentation. The results demonstrate that while feature-space perturbations already degrade detection performance, structural manipulation amplifies this effect considerably. In several attack categories, evasion rates approach complete bypass, revealing a critical gap between benchmark accuracy and adversarial robustness.
+
+\item \textbf{Feature-Level Vulnerability Analysis.}  
+A feature reset analysis was conducted to identify which flow statistics contribute most strongly to model decisions under fragmentation. The results indicate heavy reliance on temporal aggregation metrics such as inter-arrival time statistics. This finding provides insight into the specific mechanisms through which fragmentation disrupts detection and highlights the need for more invariant feature representations.
+
+\item \textbf{Empirical Evidence of Structural Fragility in Flow-Based NIDS.}  
+The overall findings support the hypothesis that flow-based ML-NIDS are inherently brittle when feature extraction depends on aggregated packet statistics. Fragmentation alters packet counts, timing distributions, and byte-level aggregates, effectively corrupting the feature vector before classification occurs. This reveals a structural weakness in detection pipelines that rely exclusively on summarized flow descriptors.
+
+\end{itemize}
+
+\section{Implications for NIDS Research}
+
+The implications of these findings extend beyond the specific framework implemented in this work and raise broader considerations for the design and evaluation of ML-based intrusion detection systems.
+
+\subsection{The Critical Role of Traffic Reassembly}
+
+The high success rate of fragmentation-based evasion strongly suggests that any NIDS operating on fragmented flows without prior reassembly is inherently vulnerable. Feature extraction performed on incomplete or artificially segmented flows produces distorted representations that undermine classifier reliability. Therefore, robust defragmentation mechanisms must be considered a foundational requirement rather than an optional preprocessing step. Increasing model complexity or adopting deeper architectures cannot compensate for fundamentally corrupted input representations.
+
+\subsection{Rethinking Feature Engineering in ML-NIDS}
+
+The demonstrated vulnerability to PSO-driven manipulation indicates that models heavily dependent on low-level statistical features, such as packet length distributions, flow duration, and inter-arrival times, are particularly susceptible to adversarial perturbation. These features, while computationally efficient, lack invariance to structural transformations of traffic.
+
+Future research should therefore explore alternative representations, including:
+
+\begin{itemize}
+\item Stateful behavioral modeling across extended time windows,
+\item Graph-based representations of host communication patterns,
+\item Payload-aware or hybrid Deep Packet Inspection (DPI) assisted approaches,
+\item Temporal sequence modeling using recurrent or attention-based architectures.
+\end{itemize}
+
+Such approaches may reduce sensitivity to superficial statistical manipulation while preserving detection capability.
+
+\subsection{Adversarial Robustness as a Standard Evaluation Criterion}
+
+A central insight of this thesis is that high performance on static benchmark datasets does not guarantee operational security. The observed discrepancy between baseline accuracy and adversarial performance underscores the necessity of incorporating robustness evaluation into standard NIDS assessment protocols. Just as accuracy, precision, and recall are routinely reported, robustness under active adversarial manipulation should become a standard metric in future research.
+
+Without adversarial stress-testing, published performance figures risk overstating the true defensive capability of ML-based systems.
+
+\section{Limitations}
+
+While the results provide compelling evidence of structural vulnerability, certain limitations must be acknowledged. The experimental evaluation was conducted within a controlled environment and focused primarily on flow-based detection architectures. Although the fragmentation engine is protocol-compliant, real-world network conditions, such as middlebox behavior, stateful firewalls, and traffic normalization mechanisms, may influence attack feasibility.
+
+Furthermore, the surrogate-based optimization approach assumes partial knowledge of the target system. Although such assumptions are common in adversarial ML research, they may not always reflect practical deployment scenarios. These limitations do not invalidate the findings but rather contextualize their scope and motivate further empirical validation.
+
+\section{Future Work}
+
+Several promising directions emerge from this study, aiming both to enhance adversarial evaluation methodologies and to develop more resilient detection systems.
+
+\subsection{Adversarial Training and Defensive Hardening}
+
+One immediate extension involves systematically incorporating adversarial samples generated by the framework into the training process. Evaluating robustness–accuracy trade-offs, class-wise robustness balance, and potential overfitting to specific perturbation patterns would provide deeper insight into the defensive potential of adversarial training within NIDS contexts.
+
+\subsection{Extension to IPv6 and Advanced Transport-Layer Manipulation}
+
+The current implementation focuses on IPv4 fragmentation. Extending support to IPv6 fragmentation via Extension Headers represents a necessary step to maintain relevance as network infrastructure evolves. Additionally, incorporating more advanced transport-layer manipulations, such as overlapping fragments, TCP segmentation anomalies, or adaptive window manipulation, would further expand the threat model and improve realism.
+
+\subsection{Hybrid and Multi-Layer Detection Architectures}
+
+Future research should explore hybrid detection architectures that integrate:
+
+\begin{itemize}
+\item Signature-based detection of known fragmentation anomalies,
+\item Stateful traffic reassembly engines,
+\item Machine learning-based anomaly detection.
+\end{itemize}
+
+Investigating methods for fusing these components, either through ensemble strategies or hierarchical decision pipelines, may yield architectures that balance robustness and computational efficiency.
+
+\subsection{Explainability under Adversarial Conditions}
+
+Understanding why specific fragmented samples evade detection remains a critical research question. Applying Explainable AI (XAI) techniques to visualize feature importance shifts and decision-boundary distortions induced by fragmentation could reveal systematic blind spots. Such insights would not only improve interpretability but also guide the development of more invariant feature representations.
+
+\subsection{Real-World Deployment Validation}
+
+Finally, validating the framework and corresponding defenses in realistic network environments represents a crucial step toward operational relevance. Evaluating performance against production-grade NIDS systems, measuring throughput constraints, and assessing latency overhead would bridge the gap between academic experimentation and deployable security solutions.
+
+\bigskip
+
+In conclusion, this thesis demonstrates that adversarial robustness remains an under-addressed challenge in ML-based network intrusion detection. By exposing structural weaknesses in flow-based detection pipelines and proposing a realistic adversarial evaluation framework, this work contributes to a more security-oriented understanding of machine learning deployment in network defense. Ensuring robustness against adaptive adversaries must become a foundational objective in the next generation of intelligent intrusion detection systems.

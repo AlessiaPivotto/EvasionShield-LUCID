@@ -1,0 +1,222 @@
+\contentsline {chapter}{Abstract}{4}{}%
+\contentsline {chapter}{\numberline {1}Introduction}{6}{}%
+\contentsline {chapter}{\numberline {2}Background}{8}{}%
+\contentsline {section}{\numberline {2.1}Network Intrusion Detection Systems}{8}{}%
+\contentsline {subsubsection}{Detection Pipeline and Operational Framework}{8}{}%
+\contentsline {subsection}{\numberline {2.1.1}Network Traffic Features and Representation}{9}{}%
+\contentsline {subsubsection}{Granularity of Traffic Representation}{9}{}%
+\contentsline {subsubsection}{Taxonomy of Network Traffic Features}{9}{}%
+\contentsline {subsubsection}{Structural and Graph-Based Representations}{10}{}%
+\contentsline {subsection}{\numberline {2.1.2}Signature-Based NIDS}{10}{}%
+\contentsline {subsubsection}{Limitations and Evasion Strategies}{11}{}%
+\contentsline {subsection}{\numberline {2.1.3}Anomaly-Based and Machine-Learning NIDS}{11}{}%
+\contentsline {subsubsection}{Limitations}{12}{}%
+\contentsline {paragraph}{Decision Thresholds and False Positives}{12}{}%
+\contentsline {paragraph}{Concept Drift and Adaptability}{12}{}%
+\contentsline {subsection}{\numberline {2.1.4}Machine Learning versus Deep Learning in NIDS}{12}{}%
+\contentsline {subsubsection}{Feature Engineering and Data Representation}{12}{}%
+\contentsline {subsubsection}{Model Complexity and Computational Requirements}{13}{}%
+\contentsline {subsubsection}{Interpretability and Trustworthiness}{13}{}%
+\contentsline {subsubsection}{Robustness and Adversarial Vulnerability}{13}{}%
+\contentsline {section}{\numberline {2.2}Adversarial Machine Learning in Cybersecurity}{14}{}%
+\contentsline {subsection}{\numberline {2.2.1}Threat Models}{14}{}%
+\contentsline {subsubsection}{Attacker Knowledge Assumptions}{14}{}%
+\contentsline {subsubsection}{Attacker Capabilities and Operational Phase}{14}{}%
+\contentsline {subsubsection}{Adversarial Goals and Security Violations}{15}{}%
+\contentsline {subsubsection}{Domain-Specific Constraints in Network Traffic}{15}{}%
+\contentsline {subsection}{\numberline {2.2.2}Evasion Attacks}{15}{}%
+\contentsline {subsubsection}{Adversarial Intervention Space}{15}{}%
+\contentsline {subsubsection}{Evasion Strategies and Traffic Manipulation Techniques}{16}{}%
+\contentsline {subsubsection}{Domain Constraints and Semantic Preservation}{16}{}%
+\contentsline {subsubsection}{The Inverse Feature-Mapping Problem}{16}{}%
+\contentsline {subsection}{\numberline {2.2.3}Poisoning Attacks}{17}{}%
+\contentsline {subsubsection}{Mechanisms of Training Data Manipulation}{17}{}%
+\contentsline {subsubsection}{Adaptive and Incremental Poisoning}{17}{}%
+\contentsline {subsubsection}{Practical Limitations and Operational Constraints}{18}{}%
+\contentsline {subsubsection}{Defensive Countermeasures}{18}{}%
+\contentsline {subsection}{\numberline {2.2.4}Constraints in Network Traffic Manipulation}{18}{}%
+\contentsline {subsubsection}{Protocol Compliance and Syntactic Constraints}{18}{}%
+\contentsline {subsubsection}{Semantic Preservation and Feature Interdependencies}{19}{}%
+\contentsline {subsubsection}{Temporal Consistency and Physical Limitations}{19}{}%
+\contentsline {subsubsection}{Malicious Functionality Preservation}{19}{}%
+\contentsline {subsubsection}{Infeasibility of Arbitrary Perturbations}{19}{}%
+\contentsline {section}{\numberline {2.3}Traffic Manipulation for Evasion}{20}{}%
+\contentsline {subsection}{\numberline {2.3.1}Feature-Level Perturbation Techniques}{20}{}%
+\contentsline {subsubsection}{Taxonomy of Feature-Level Perturbation Strategies}{20}{}%
+\contentsline {subsubsection}{Functional Preservation and Feature Selection}{20}{}%
+\contentsline {subsubsection}{Limitations and Deployability Challenges}{21}{}%
+\contentsline {subsection}{\numberline {2.3.2}Traffic-Level Manipulation Frameworks}{21}{}%
+\contentsline {subsubsection}{Constraints and Realism in Adversarial Environments}{22}{}%
+\contentsline {subsubsection}{Deployment Challenges and Operational Feasibility}{22}{}%
+\contentsline {subsubsection}{Evaluation Methodologies}{22}{}%
+\contentsline {section}{\numberline {2.4}Traffic Manipulation and Evasion Techniques}{23}{}%
+\contentsline {subsection}{\numberline {2.4.1}Fragmentation as a Primary Evasion Vector}{23}{}%
+\contentsline {subsubsection}{Fragmentation Mechanisms and Protocol Context}{23}{}%
+\contentsline {subsubsection}{Impact on NIDS Processing and Feature Extraction}{23}{}%
+\contentsline {subsubsection}{Advanced Fragmentation Attack Strategies}{24}{}%
+\contentsline {subsubsection}{Empirical Evidence and Performance Impact}{24}{}%
+\contentsline {subsubsection}{Defensive Countermeasures and Operational Trade-offs}{24}{}%
+\contentsline {subsection}{\numberline {2.4.2}Feature-Level Perturbation Techniques}{25}{}%
+\contentsline {subsubsection}{Taxonomy of Feature-Level Perturbation Strategies}{25}{}%
+\contentsline {subsubsection}{Functional Preservation and Operational Constraints}{25}{}%
+\contentsline {subsubsection}{Limitations and Deployability Challenges}{25}{}%
+\contentsline {subsection}{\numberline {2.4.3}Traffic-Level Manipulation Frameworks}{25}{}%
+\contentsline {subsubsection}{Constraints and Realism in Adversarial Environments}{26}{}%
+\contentsline {section}{\numberline {2.5}Datasets and Adversarial Training for NIDS}{27}{}%
+\contentsline {subsection}{\numberline {2.5.1}Taxonomical Limitations of Existing Datasets}{28}{}%
+\contentsline {subsection}{\numberline {2.5.2}Adversarial Data Augmentation and Robustness Optimization}{28}{}%
+\contentsline {section}{\numberline {2.6}Research Tools and Frameworks}{28}{}%
+\contentsline {subsection}{\numberline {2.6.1}LUCID: Lightweight Deep Learning Solution for DDoS Detection}{28}{}%
+\contentsline {subsubsection}{Architecture and Design Principles}{28}{}%
+\contentsline {subsubsection}{Feature Extraction and Traffic Representation}{29}{}%
+\contentsline {subsubsection}{Experimental Validation and Performance}{29}{}%
+\contentsline {subsection}{\numberline {2.6.2}Traffic Manipulator: Black-Box Adversarial Traffic Generation}{29}{}%
+\contentsline {subsubsection}{Design Philosophy}{30}{}%
+\contentsline {subsubsection}{Optimization-Based Traffic Mutation}{30}{}%
+\contentsline {subsubsection}{Manipulation Operators}{30}{}%
+\contentsline {subsubsection}{End-to-End Workflow}{31}{}%
+\contentsline {subsubsection}{Model-Agnostic and Generic Framework}{31}{}%
+\contentsline {subsubsection}{Practical Implementation and Deployment}{31}{}%
+\contentsline {chapter}{\numberline {3}State of the Art}{32}{}%
+\contentsline {section}{\numberline {3.1}Adversarial Evasion Attacks Against ML-Based NIDS}{32}{}%
+\contentsline {subsection}{\numberline {3.1.1}Feature-Space Attack Methodologies}{32}{}%
+\contentsline {subsection}{\numberline {3.1.2}Protocol-Aware Problem-Space Attacks}{32}{}%
+\contentsline {subsection}{\numberline {3.1.3}Structural and Protocol-Level Manipulation}{33}{}%
+\contentsline {section}{\numberline {3.2}Defensive Approaches and Countermeasures}{33}{}%
+\contentsline {subsection}{\numberline {3.2.1}Adversarial Training and Data Augmentation}{33}{}%
+\contentsline {subsection}{\numberline {3.2.2}Input Preprocessing and Denoising}{34}{}%
+\contentsline {subsection}{\numberline {3.2.3}Architectural and Algorithmic Robustness}{34}{}%
+\contentsline {section}{\numberline {3.3}Traffic Manipulation and Evaluation Frameworks}{34}{}%
+\contentsline {subsection}{\numberline {3.3.1}The Fundamental Challenge: Feature Space to Problem Space Translation}{34}{}%
+\contentsline {subsection}{\numberline {3.3.2}Comprehensive Assessment and Defense Frameworks}{35}{}%
+\contentsline {subsubsection}{TIKI-TAKA: Time-Based Robustness Assessment}{35}{}%
+\contentsline {paragraph}{Mechanism and Architecture:}{35}{}%
+\contentsline {paragraph}{Defense Integration:}{35}{}%
+\contentsline {paragraph}{Limitations and Challenges:}{35}{}%
+\contentsline {subsubsection}{RePO: Reconstruction from Partial Observation}{35}{}%
+\contentsline {paragraph}{Architectural Innovation:}{36}{}%
+\contentsline {paragraph}{RePO+ Enhancement:}{36}{}%
+\contentsline {paragraph}{Computational Complexity and Deployment Challenges:}{36}{}%
+\contentsline {subsection}{\numberline {3.3.3}Pattern-Based and Distribution-Aware Frameworks}{36}{}%
+\contentsline {subsubsection}{A2PM: Adaptive Perturbation Pattern Method}{36}{}%
+\contentsline {paragraph}{Pattern Learning Mechanism:}{36}{}%
+\contentsline {paragraph}{Gray-Box Optimization:}{37}{}%
+\contentsline {paragraph}{Application Scope and Limitations:}{37}{}%
+\contentsline {subsubsection}{ProGen: Projection-Based Distribution Mapping}{37}{}%
+\contentsline {paragraph}{Distribution-Projection Paradigm:}{37}{}%
+\contentsline {paragraph}{GAN-Based Traffic Generation:}{37}{}%
+\contentsline {paragraph}{Validation and Real-World Deployment Challenges:}{37}{}%
+\contentsline {subsection}{\numberline {3.3.4}Traffic-Space Manipulation and Optimization Frameworks}{38}{}%
+\contentsline {subsubsection}{TrafficManipulator: Bi-Level Optimization Architecture}{38}{}%
+\contentsline {paragraph}{Two-Stage Optimization Process:}{38}{}%
+\contentsline {paragraph}{Safe Mutation Operators:}{38}{}%
+\contentsline {paragraph}{Meta-Information Representation:}{38}{}%
+\contentsline {paragraph}{Limitations and Deployment Constraints:}{38}{}%
+\contentsline {subsection}{\numberline {3.3.5}Timing-Based and Temporal Manipulation Frameworks}{39}{}%
+\contentsline {subsubsection}{TANTRA: Temporal Adversarial Network Traffic Reshaping}{39}{}%
+\contentsline {paragraph}{LSTM-Based Temporal Modeling:}{39}{}%
+\contentsline {paragraph}{Traffic Stream Reshaping:}{39}{}%
+\contentsline {paragraph}{Real-Time Implementation Challenges:}{39}{}%
+\contentsline {subsection}{\numberline {3.3.6}GAN-Based Defense and Hardening Frameworks}{39}{}%
+\contentsline {subsubsection}{GADoT: GAN-based Adversarial Training for DDoS Detection}{39}{}%
+\contentsline {paragraph}{WGAN-GP Architecture for Traffic Generation:}{39}{}%
+\contentsline {paragraph}{Decoupled Generation and Training:}{40}{}%
+\contentsline {paragraph}{Multi-Feature Perturbation Strategy:}{40}{}%
+\contentsline {paragraph}{Scope Limitations and Computational Requirements:}{40}{}%
+\contentsline {subsection}{\numberline {3.3.7}Federated and Distributed Framework Architectures}{40}{}%
+\contentsline {subsubsection}{FedNIDS: Federated Learning for Collaborative Detection}{40}{}%
+\contentsline {paragraph}{Two-Stage Federated Architecture:}{40}{}%
+\contentsline {paragraph}{Privacy-Preserving Threat Intelligence Sharing:}{41}{}%
+\contentsline {paragraph}{Adversarial Considerations in Federated Environments:}{41}{}%
+\contentsline {paragraph}{Scalability and Deployment Challenges:}{41}{}%
+\contentsline {subsection}{\numberline {3.3.8}Comparative Framework Analysis}{41}{}%
+\contentsline {subsection}{\numberline {3.3.9}Framework Integration and Future Directions}{41}{}%
+\contentsline {section}{\numberline {3.4}Evaluation Practices and Dataset Limitations}{42}{}%
+\contentsline {subsection}{\numberline {3.4.1}Static Benchmark Dataset Challenges}{42}{}%
+\contentsline {subsection}{\numberline {3.4.2}Transferability and Generalization Issues}{42}{}%
+\contentsline {subsection}{\numberline {3.4.3}Real-World Validation Gaps}{42}{}%
+\contentsline {section}{\numberline {3.5}Research Gaps and Future Directions}{42}{}%
+\contentsline {subsection}{\numberline {3.5.1}Protocol-Aware Adversarial Generation}{42}{}%
+\contentsline {subsection}{\numberline {3.5.2}Fragmentation-Aware Robustness}{43}{}%
+\contentsline {subsection}{\numberline {3.5.3}Dynamic and Stateful Detection}{43}{}%
+\contentsline {subsection}{\numberline {3.5.4}Standardized Robustness Metrics}{43}{}%
+\contentsline {section}{\numberline {3.6}Critical Analysis and Synthesis}{43}{}%
+\contentsline {subsection}{\numberline {3.6.1}Realism versus Optimization Efficiency}{43}{}%
+\contentsline {subsection}{\numberline {3.6.2}Practical Deployability Considerations}{44}{}%
+\contentsline {subsection}{\numberline {3.6.3}Robustness versus Generalization}{44}{}%
+\contentsline {section}{\numberline {3.7}Conclusion}{44}{}%
+\contentsline {subsection}{\numberline {3.7.1}Framework Maturation and Specialization}{44}{}%
+\contentsline {subsection}{\numberline {3.7.2}Persistent Implementation Challenges}{45}{}%
+\contentsline {subsection}{\numberline {3.7.3}Critical Integration Gaps}{45}{}%
+\contentsline {subsection}{\numberline {3.7.4}Future Research Imperatives}{45}{}%
+\contentsline {subsection}{\numberline {3.7.5}Strategic Research Priorities}{46}{}%
+\contentsline {subsection}{\numberline {3.7.6}Implications for Network Security Practice}{46}{}%
+\contentsline {chapter}{\numberline {4}Methodology}{47}{}%
+\contentsline {section}{\numberline {4.1}Motivations}{47}{}%
+\contentsline {section}{\numberline {4.2}System Architecture}{47}{}%
+\contentsline {subsection}{\numberline {4.2.1}Phase 1: Feature-Space Optimization (GAN + PSO)}{48}{}%
+\contentsline {subsection}{\numberline {4.2.2}Phase 2: Stochastic Fragmentation}{48}{}%
+\contentsline {section}{\numberline {4.3}FRANTIC}{49}{}%
+\contentsline {subsection}{\numberline {4.3.1}Design Principles}{49}{}%
+\contentsline {subsection}{\numberline {4.3.2}Architecture}{49}{}%
+\contentsline {subsection}{\numberline {4.3.3}Algorithmic Formulation}{49}{}%
+\contentsline {section}{\numberline {4.4}Protocol Compliance Constraints}{50}{}%
+\contentsline {subsubsection}{8-Byte Alignment}{51}{}%
+\contentsline {subsubsection}{Header Field Management}{51}{}%
+\contentsline {subsection}{\numberline {4.4.1}Stochastic Properties and Adversarial Implications}{51}{}%
+\contentsline {subsection}{\numberline {4.4.2}Impact on NIDS Evasion}{52}{}%
+\contentsline {section}{\numberline {4.5}Preprocessing Pipeline}{52}{}%
+\contentsline {chapter}{\numberline {5}Experimental Evaluation}{54}{}%
+\contentsline {section}{\numberline {5.1}Experimental Setup}{54}{}%
+\contentsline {section}{\numberline {5.2}Baseline Performance}{54}{}%
+\contentsline {section}{\numberline {5.3}Performance Under the Original Manipulator}{55}{}%
+\contentsline {section}{\numberline {5.4}Impact of Fragmentation-Enhanced Attacks}{56}{}%
+\contentsline {section}{\numberline {5.5}Robustness Analysis}{58}{}%
+\contentsline {section}{\numberline {5.6}Statistical Considerations}{59}{}%
+\contentsline {section}{\numberline {5.7}Ablation Study and Design Validation}{60}{}%
+\contentsline {section}{\numberline {5.8}Single Flow Evolution Analysis}{61}{}%
+\contentsline {subsection}{\numberline {5.8.1}Observed Transformation Patterns}{61}{}%
+\contentsline {subsection}{\numberline {5.8.2}Implications}{62}{}%
+\contentsline {section}{\numberline {5.9}Vulnerability Analysis: Feature Reset Test}{62}{}%
+\contentsline {subsection}{\numberline {5.9.1}Single-Feature Dependency Analysis}{63}{}%
+\contentsline {section}{\numberline {5.10}Strategic Insights}{64}{}%
+\contentsline {section}{\numberline {5.11}Overhead Analysis of the Extended Manipulator}{64}{}%
+\contentsline {subsection}{\numberline {5.11.1}Computational Overhead}{64}{}%
+\contentsline {subsubsection}{PSO Optimization Cost}{64}{}%
+\contentsline {subsubsection}{Feature Extraction Cost}{64}{}%
+\contentsline {subsubsection}{Fragmentation Processing Cost}{65}{}%
+\contentsline {subsection}{\numberline {5.11.2}Memory Overhead}{65}{}%
+\contentsline {subsubsection}{Statistics Storage}{65}{}%
+\contentsline {subsubsection}{Fragmentation-Induced Memory Growth}{65}{}%
+\contentsline {subsection}{\numberline {5.11.3}Network Traffic Overhead}{66}{}%
+\contentsline {subsection}{\numberline {5.11.4}Summary of Overhead Impact}{66}{}%
+\contentsline {subsection}{\numberline {5.11.5}Conclusion}{66}{}%
+\contentsline {chapter}{\numberline {6}Applications of AEGIS}{67}{}%
+\contentsline {section}{\numberline {6.1}Dataset Augmentation and Penetration Testing}{67}{}%
+\contentsline {section}{\numberline {6.2}NIDS Robustness Evaluation}{68}{}%
+\contentsline {section}{\numberline {6.3}Adversarial Training}{68}{}%
+\contentsline {subsection}{\numberline {6.3.1}Training Strategy Comparison}{69}{}%
+\contentsline {section}{\numberline {6.4}Limitations}{69}{}%
+\contentsline {chapter}{\numberline {7}Conclusions and Future Work}{73}{}%
+\contentsline {section}{\numberline {7.1}Summary of Contributions}{73}{}%
+\contentsline {section}{\numberline {7.2}Implications for NIDS Research}{74}{}%
+\contentsline {subsection}{\numberline {7.2.1}The Critical Role of Traffic Reassembly}{74}{}%
+\contentsline {subsection}{\numberline {7.2.2}Rethinking Feature Engineering in ML-NIDS}{74}{}%
+\contentsline {subsection}{\numberline {7.2.3}Adversarial Robustness as a Standard Evaluation Criterion}{74}{}%
+\contentsline {section}{\numberline {7.3}Limitations}{74}{}%
+\contentsline {section}{\numberline {7.4}Future Work}{75}{}%
+\contentsline {subsection}{\numberline {7.4.1}Adversarial Training and Defensive Hardening}{75}{}%
+\contentsline {subsection}{\numberline {7.4.2}Extension to IPv6 and Advanced Transport-Layer Manipulation}{75}{}%
+\contentsline {subsection}{\numberline {7.4.3}Hybrid and Multi-Layer Detection Architectures}{75}{}%
+\contentsline {subsection}{\numberline {7.4.4}Explainability under Adversarial Conditions}{75}{}%
+\contentsline {subsection}{\numberline {7.4.5}Real-World Deployment Validation}{75}{}%
+\contentsline {chapter}{Bibliography}{75}{}%
+\contentsline {chapter}{\numberline {A}Complete tables}{81}{}%
+\contentsline {section}{\numberline {A.1}F1 score tables attack per attack}{81}{}%
+\contentsline {section}{\numberline {A.2}FNR tables attack per attack}{82}{}%
+\contentsline {chapter}{\numberline {B}Implementation of the Fragmentation Module}{83}{}%
+\contentsline {section}{\numberline {B.1}Orchestration Logic (\texttt {manipulator.py})}{83}{}%
+\contentsline {section}{\numberline {B.2}Fragment Construction Logic (\texttt {rebuilder.py})}{84}{}%
+\contentsline {chapter}{\numberline {C}Complete comparison tables}{85}{}%
+\contentsline {section}{\numberline {C.1}F1-score comparison}{85}{}%
+\contentsline {section}{\numberline {C.2}FNR comparison}{86}{}%

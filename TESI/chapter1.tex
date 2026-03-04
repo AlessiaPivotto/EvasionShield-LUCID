@@ -1,0 +1,47 @@
+\chapter{Introduction}
+\label{cha:intro}
+
+Traditional cyber threat detection approaches, such as those based on signatures, rules, and heuristics, have been in use for a long time to protect networks and information systems. These solutions operate using pre-defined rules and criteria defined in the form of signatures for known threats like byte sequences and traffic thresholds. These solutions can be effectively used for known threats; however, they are less effective in dealing with unknown threats.
+
+The major drawback in conventional detection systems is their lack of ability to generalize attack patterns defined explicitly. The polymorphic code, zero-day attacks, and emerging threats pose no difficulty in bypassing such predefined signature-based detection systems. Furthermore, in conventional detection systems, the absence of contextual intelligence often gives rise to situations such as identifying bursts of legitimate traffic as denial-of-service attacks and overlooking two-phase attack plans acted upon over time periods in networks. These detection systems require continuous human intervention, thereby reducing scalability in modern networks.
+
+To address this, learning algorithms from the Machine Learning (ML) family have been increasingly incorporated into the design of Network Intrusion Detection Systems (NIDS). Traditional methods for detecting intrusive actions are largely specific to signature definition. By contrast, learning algorithms developed into NIDS can learn models for detecting intrusive actions from data, and they learn to recognize complicated patterns and behavior anomalies without being limited to signature definition. Historically available data, for instance, can be utilized by ML algorithms to identify patterns for both normal and intrusive actions.
+
+That being said, ML-based NIDS further facilitate multi-dimensional analysis of network traffic by taking into account temporal, statistical, and behavioral features. For instance, sophisticated approaches like deep learning are capable of automatically learning hierarchical features, thereby lessening manual intervention for feature engineering. Nevertheless, to present these benefits, ML-based NIDS also bring forth new issues, for instance, reliance on high-quality training data, the possibility of overfitting, high computational complexity, and lack of interpretability. 
+
+Moreover, using ML in the domain of network security introduces fresh security issues as well. Adversarial attacks against the ML-based NIDS are possible; for instance, attackers can attempt to deceive the system with malicious traffic as well as with malicious data used for the training process, keeping the malicious functionality intact.
+
+Most of the adversarial approaches presently lying in the NIDS domain are focused on modifying features extracted from traffic flows, for instance, packet sizes, inter-arrival times, or protocol-level attributes. While effective, these feature-based attacks completely ignore a wide class of evasion techniques based on the manipulation of packet structure. Of these, packet fragmentation represents a very strong and often underestimated evasion vector since it allows an attacker to change traffic characteristics, hinder feature extraction, and exploit weaknesses in the packet reassembly logic of some NIDS implementations.
+
+The lack of standardized adversarial data at a traffic level causes a considerable difference between experimentation and real-world deployment. Feature-space perturbations, while more effective at a lab level, can hardly be backtracked to replayable traffic because of constraints on protocols, inter-feature relationships, and the one-way process involved in feature extractors. This can cause NIDS models to possess an exaggerated sense of resilience when trained or even tested on adversarial data alone, while still being susceptible to methods that deal directly in terms of packet and flow.
+
+This challenge leads to the incentive of developing efficient traffic manipulation techniques capable of producing adversarial traces that are useful in adversarial learning as well as penetration testing. More specifically, a fragmenting approach presents a controllable and legitimate means of manipulating traffic features without affecting the corresponding malicious service provided by the attack traffic: Instead of manipulating traffic features independently, traffic fragmentation allows a different sort of exploration of the traffic’s feature space by exploiting the traffic’s structural features as seen from an external perspective, which in particular are vulnerable in an ML/DL-powered NIDS concerning flow reconstruction, feature extraction, and temporal modeling.
+
+In this thesis, these challenges are remedied by integrating an existing traffic manipulation toolkit with FRANTIC ( FRAgmeNTation adversarIal Component), an additional packet fragmentation module for handling this job. The proposed final framework, called \textbf{AEGIS} (Adversarial Evaluation and Generation framework for Intrusion Detection Systems), would enable the creation of adversarial examples for network traffic at the packet level of granularity, involving the crafting of subtle manipulations across multiple derived characteristics of the network traffic. This would improve evasion capability while maintaining corresponding attack semantics in order to create more realistic versions of adversarial samples that can be directly used for adversarial training or penetration testing.
+
+This thesis investigates the impact of fragmentation-based adversarial transformations on NIDS
+robustness through the following research questions:
+
+\begin{itemize}
+    \item \textbf{RQ1:} How does packet fragmentation affect the detection performance of machine-learning-based NIDS?
+    \item \textbf{RQ2:} Does combining feature-level manipulation with fragmentation provide stronger evasion capabilities compared to feature manipulation alone?
+    \item \textbf{RQ3:} Can fragmentation-augmented adversarial traffic be used to construct realistic datasets that support adversarial training, benchmarking, and penetration testing?
+\end{itemize}
+
+%\section{Contributions}
+%The main contributions of this thesis can be summarized as follows:
+%\begin{itemize}
+    %\item \textbf{Design and implementation of FRATM}, a fragmentation-augmented adversarial traffic manipulator that extends an %existing feature-based manipulation framework.
+    %\item \textbf{A packet fragmentation module} capable of splitting malicious packets into standards-compliant fragments while %preserving functionality and payload semantics.
+    %\item \textbf{A comprehensive evaluation} of the effectiveness of fragmentation-based adversarial attacks across multiple ML-%based NIDS models.
+    %\item \textbf{Creation of augmented datasets} containing fragmented adversarial traffic, supporting future research in %adversarial training and robustness benchmarking.
+    %\item \textbf{Analysis of NIDS robustness limitations}, revealing weaknesses and highlighting the need for improved %detection strategies sensitive to structural perturbations.
+%\end{itemize}
+
+The remainder of this thesis is structured as follows:  
+\textbf{Chapter~2} provides the background information and the required basic knowledge that is essential in this thesis.  
+\textbf{Chapter~3} provides the state of the art in the field, discussing the available traffic manipulation and evasion frameworks for NIDS, with special emphasis on the available packet fragmentation methodologies and their use in evasion techniques, as well as the limitations identified in the state of the art.  
+\textbf{Chapter~4} provides the proposed methodology, including the available manipulator, the identified limitations, and the proposed packet fragmentation module.  
+\textbf{Chapter~5} presents the experimental evaluation of the proposed methodology and the analysis of the effect of the identified evasion technique on NIDS.  
+\textbf{Chapter~6} provides the potential applications of the proposed manipulator, including data augmentation, adversarial testing, and adversarial training.  
+Finally, \textbf{Chapter~7} concludes the thesis and provides potential future work.
