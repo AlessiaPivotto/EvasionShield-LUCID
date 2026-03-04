@@ -36,7 +36,7 @@ from scipy import stats
 
 class UnifiedTester:
     def __init__(self, base_datasets_dir="./TrafficManipulator-master/DATASETS", 
-                 model_path="./output/10t-100n-DOS2019-LUCID-FLATTEN.h5"):
+                 model_path="./flatten_lucid/output/10t-100n-DOS2019-LUCID-FLATTEN.h5"):
         self.base_datasets_dir = base_datasets_dir
         self.model_path = model_path
         self.results_base_dir = "./ResultsFlattenLucid"
@@ -773,7 +773,7 @@ Examples:
     parser.add_argument('--base-dir', default='./TrafficManipulator-master/DATASETS',
                        help='Base directory containing datasets (default: ./TrafficManipulator-master/DATASETS)')
     parser.add_argument('--model', default='./output/10t-100n-DOS2019-LUCID-FLATTEN.h5',
-                       help='Path to the model file (default: ./output/10t-100n-DOS2019-LUCID-FLATTEN.h5)')
+                       help='Path to the model file (default: ./flatten_lucid/output/10t-100n-DOS2019-LUCID-FLATTEN.h5)')
     
     args = parser.parse_args()
     

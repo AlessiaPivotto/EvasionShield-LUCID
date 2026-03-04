@@ -125,7 +125,7 @@ def merge_all_datasets():
     datasets = {
         "Original": "./TrafficManipulator-master/DATASETS/FLATTEN-PCAPS",
         "Manipulated": "./TrafficManipulator-master/DATASETS/MANIPULATED-FLATTEN_42", 
-        "Fragmented": "./TrafficManipulator-master/DATASETS/FRAGMENTED_42"
+        "Fragmented": "./TrafficManipulator-master/DATASETS/FRAGMENTED_42_150"
     }
     
     attack_type = "00-WebDDoS"  # Focus on WebDDoS for now
